@@ -1,0 +1,201 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/sw.js",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Service-Worker-Allowed": "/"
+      }
+    },
+    {
+      "src": "/snake",
+      "dest": "/games/snake/index.html"
+    },
+    {
+      "src": "/minesweeper",
+      "dest": "/games/minesweeper/index.html"
+    },
+    {
+      "src": "/blockblast",
+      "dest": "/games/blockblast/index.html"
+    },
+    {
+      "src": "/rekenmachine",
+      "dest": "/games/rekenmachine/index.html"
+    },
+    {
+      "src": "/2048",
+      "dest": "/games/2048/index.html"
+    },
+    {
+      "src": "/tetris",
+      "dest": "/games/tetris/index.html"
+    },
+    {
+      "src": "/memory",
+      "dest": "/games/memory/index.html"
+    },
+    {
+      "src": "/flappy",
+      "dest": "/games/flappy/index.html"
+    },
+    {
+      "src": "/pong",
+      "dest": "/games/pong/index.html"
+    },
+    {
+      "src": "/sudoku",
+      "dest": "/games/sudoku/index.html"
+    },
+    {
+      "src": "/gnomelauncher",
+      "dest": "/games/gnomelauncher/index.html"
+    },
+    {
+      "src": "/breakout",
+      "dest": "/games/breakout/index.html"
+    },
+    {
+      "src": "/baseball",
+      "dest": "/games/baseball/index.html"
+    },
+    {
+      "src": "/tools",
+      "dest": "/tools/index.html"
+    },
+    {
+      "src": "/kleurenkiezer",
+      "dest": "/kleurenkiezer/index.html"
+    },
+    {
+      "src": "/qr-generator",
+      "dest": "/qr-generator/index.html"
+    },
+    {
+      "src": "/wachtwoord",
+      "dest": "/wachtwoord/index.html"
+    },
+    {
+      "src": "/tekst",
+      "dest": "/tekst/index.html"
+    },
+    {
+      "src": "/eenheden",
+      "dest": "/eenheden/index.html"
+    },
+    {
+      "src": "/numworks",
+      "dest": "/numworks/index.html"
+    },
+    {
+      "src": "/biologie",
+      "dest": "/biologie/index.html"
+    },
+    {
+      "src": "/study-tools",
+      "dest": "/study-tools/index.html"
+    },
+    {
+      "src": "/leerplatform",
+      "dest": "/leerplatform/index.html"
+    },
+    {
+      "src": "/woordenlijst",
+      "dest": "/woordenlijst/index.html"
+    },
+    {
+      "src": "/flashcards",
+      "dest": "/flashcards/index.html"
+    },
+    {
+      "src": "/oefentoetsen",
+      "dest": "/oefentoetsen/index.html"
+    },
+    {
+      "src": "/samenvattingen",
+      "dest": "/samenvattingen/index.html"
+    },
+    {
+      "src": "/blooket-hacks",
+      "dest": "/blooket-hacks/index.html"
+    },
+    {
+      "src": "/alle-hacks",
+      "dest": "/alle-hacks/index.html"
+    },
+    {
+      "src": "/kahoot-hacks",
+      "dest": "/kahoot-hacks/index.html"
+    },
+    {
+      "src": "/quizlet-hacks",
+      "dest": "/quizlet-hacks/index.html"
+    },
+    {
+      "src": "/gimkit-hacks",
+      "dest": "/gimkit-hacks/index.html"
+    },
+    {
+      "src": "/blog",
+      "dest": "/blog/index.html"
+    },
+    {
+      "src": "/handleidingen",
+      "dest": "/handleidingen/index.html"
+    },
+    {
+      "src": "/how-to",
+      "dest": "/how-to/index.html"
+    },
+    {
+      "src": "/installatie",
+      "dest": "/installatie/index.html"
+    },
+    {
+      "src": "/tips",
+      "dest": "/tips/index.html"
+    },
+    {
+      "src": "/faq",
+      "dest": "/faq/index.html"
+    },
+    {
+      "src": "/problemen",
+      "dest": "/problemen/index.html"
+    },
+    {
+      "src": "/gallery",
+      "dest": "/gallery/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}

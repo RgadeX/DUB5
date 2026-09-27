@@ -1,0 +1,186 @@
+/* Nav card */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 16px 20px;
+  box-shadow: var(--glass-shadow);
+  text-decoration: none;
+  transition: background var(--dur-hover) var(--ease-hover),
+              border-color var(--dur-hover) var(--ease-hover),
+              transform var(--dur-hover) var(--ease-hover);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  background: var(--glass-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 2px solid rgba(224, 242, 254, 0.8);
+  outline-offset: 3px;
+}
+
+/* Icon chip */
+.icon-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-chip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inset: 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+.icon-chip svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  color: currentColor;
+}
+
+/* Category-based icon chip colors */
+.card[data-cat="games"] .icon-chip {
+  background: var(--accent-games);
+  color: var(--bg-3);
+}
+
+.card[data-cat="tools"] .icon-chip {
+  background: var(--accent-tools);
+  color: var(--bg-3);
+}
+
+.card[data-cat="study"] .icon-chip {
+  background: var(--accent-study);
+  color: var(--bg-3);
+}
+
+.card[data-cat="hacks"] .icon-chip {
+  background: var(--accent-hacks);
+  color: var(--bg-3);
+}
+
+.card[data-cat="guides"] .icon-chip {
+  background: var(--accent-guides);
+  color: var(--bg-3);
+}
+
+/* Card content */
+.card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.card-desc {
+  font-size: 0.83rem;
+  font-weight: 400;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 560px) {
+  .card-desc {
+    display: none;
+  }
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--r-badge);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  background: linear-gradient(135deg, var(--badge-1), var(--badge-2));
+  color: white;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* Arrow */
+.card-arrow {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  transition: transform var(--dur-hover) var(--ease-hover);
+}
+
+.card:hover .card-arrow {
+  transform: translateX(4px);
+}
+
+.card-arrow svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+/* Section pill (for category headers) */
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease-hover),
+              border-color var(--dur-hover) var(--ease-hover),
+              transform var(--dur-hover) var(--ease-hover);
+}
+
+.section-pill:hover {
+  background: var(--glass-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+
+.section-pill:focus-visible {
+  outline: 2px solid rgba(224, 242, 254, 0.8);
+  outline-offset: 3px;
+}
+
+.section-pill .icon-chip {
+  width: 32px;
+  height: 32px;
+}
+
+.section-pill .icon-chip svg {
+  width: 16px;
+  height: 16px;
+}
+
+.section-pill-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink);
+}

@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 - DUB5</title>
+<meta name="theme-color" content="#0b1150" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --line: rgba(224, 242, 254, 0.16);
+    --line-strong: rgba(224, 242, 254, 0.3);
+    --ink: rgb(226, 240, 255);
+    --ink-dim: rgba(226, 240, 255, 0.6);
+
+    --glass: rgba(9, 13, 38, 0.62);
+    --glass-hover: rgba(13, 19, 50, 0.72);
+    --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    --glass-shadow: 0 18px 40px -26px rgba(0, 0, 0, 1);
+    --glass-blur: blur(16px) saturate(160%);
+
+    --nav-hover-transition-duration: 300ms;
+    --nav-hover-transition-timing: ease-in-out;
+
+    --r-pill: 999px;
+    --r-panel: 18px;
+    --r-chip: 12px;
+
+    --gap: clamp(7px, 1.6vmin, 12px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    min-height: 100vh;
+    background: radial-gradient(140% 100% at 50% -10%, #0b1150 0%, #050833 42%, #01030f 100%);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -15%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(42% 34% at 16% 10%, rgba(70, 110, 255, 0.20), transparent 68%),
+      radial-gradient(38% 30% at 86% 16%, rgba(150, 80, 255, 0.15), transparent 66%),
+      radial-gradient(58% 42% at 52% 108%, rgba(0, 130, 230, 0.18), transparent 72%);
+    filter: blur(26px);
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: block;
+  }
+
+  .page {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem 4rem;
+  }
+
+  /* ---------- Header ---------- */
+  .game-header {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin-bottom: 2.25rem;
+  }
+
+  .back-link-fixed {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    color: var(--ink-dim);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      color var(--nav-hover-transition-duration) var(--nav-hover-transition-timing),
+      border-color var(--nav-hover-transition-duration) var(--nav-hover-transition-timing),
+      transform var(--nav-hover-transition-duration) var(--nav-hover-transition-timing),
+      background var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+
+  .back-link-fixed:hover,
+  .back-link-fixed:focus-visible {
+    color: #fff;
+    border-color: var(--line-strong);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .back-link-fixed:focus-visible {
+    outline: 2px solid rgba(224, 242, 254, 0.8);
+    outline-offset: 3px;
+  }
+
+  .back-link-fixed svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .game-title {
+    font-family: 'DM Serif Display', serif;
+    font-weight: normal;
+    font-size: 4.5rem;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(120, 170, 255, 0.28);
+    opacity: 0;
+    animation: fade-in 700ms ease-out 80ms forwards;
+  }
+
+  .game-subline {
+    margin-top: 0.85rem;
+    font-size: 0.95rem;
+    color: var(--ink-dim);
+    opacity: 0;
+    animation: fade-in 700ms ease-out 200ms forwards;
+  }
+
+  .header-rule {
+    height: 1px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 1.75rem;
+    transform: scaleX(0);
+    transform-origin: center center;
+    background: linear-gradient(
+      90deg,
+      rgba(190, 215, 255, 0) 0%,
+      rgba(190, 215, 255, 0.35) 12%,
+      rgba(214, 232, 255, 0.72) 50%,
+      rgba(190, 215, 255, 0.35) 88%,
+      rgba(190, 215, 255, 0) 100%
+    );
+    opacity: 0.75;
+    animation: rule-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) 320ms forwards;
+  }
+
+  /* ---------- Game surface ---------- */
+  .game-shell {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    border-radius: var(--r-panel);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    padding: 1.25rem;
+    opacity: 0;
+    animation: card-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 420ms forwards;
+  }
+
+  /* ---------- 2048 HUD ---------- */
+  .g-hud {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: var(--glass-inset);
+    flex-wrap: wrap;
+  }
+
+  .g-hud-scores {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+
+  .score-box {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.95rem;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(3, 5, 20, 0.55);
+    min-width: 88px;
+    overflow: hidden;
+  }
+
+  .score-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(226, 240, 255, 0.5);
+    line-height: 1;
+    margin-bottom: 0.15rem;
+  }
+
+  .score-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    transition: transform 200ms ease;
+  }
+
+  .score-value.pop {
+    animation: score-pop 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .score-gain {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%);
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #4cc9f0;
+    text-shadow: 0 0 12px rgba(76, 201, 240, 0.7);
+    pointer-events: none;
+    opacity: 0;
+    animation: score-gain 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes score-gain {
+    0%   { opacity: 0; transform: translate(-50%, 8px); }
+    20%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -22px); }
+  }
+
+  @keyframes score-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+
+  .g-hud-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .btn-new {
+    appearance: none;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    border: 1px solid rgba(190, 215, 255, 0.45);
+    background: linear-gradient(180deg, rgba(190, 215, 255, 0.22), rgba(190, 215, 255, 0.08));
+    color: #fff;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transition:
+      background 200ms ease,
+      transform 200ms ease,
+      box-shadow 200ms ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .btn-new svg { width: 14px; height: 14px; }
+
+  .btn-new:hover,
+  .btn-new:focus-visible {
+    background: linear-gradient(180deg, rgba(190, 215, 255, 0.32), rgba(190, 215, 255, 0.12));
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 10px 24px -12px rgba(190, 215, 255, 0.6);
+    outline: none;
+  }
+
+  .btn-new:focus-visible {
+    outline: 2px solid rgba(224, 242, 254, 0.8);
+    outline-offset: 3px;
+  }
+
+  /* ---------- Board ---------- */
+  .board-wrap {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .board {
+    position: relative;
+    aspect-ratio: 1;
+    padding: var(--gap);
+    border-radius: 16px;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(20, 30, 80, 0.5), rgba(2, 4, 16, 0.9));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 20px 50px -30px rgba(0, 0, 0, 1);
+    container-type: inline-size;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: box-shadow 300ms ease;
+  }
+
+  .board.is-over {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 0 0 1px rgba(251, 113, 133, 0.35),
+      0 0 60px -10px rgba(251, 113, 133, 0.55);
+  }
+
+  .board.is-won {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 0 0 1px rgba(251, 191, 36, 0.5),
+      0 0 70px -8px rgba(251, 191, 36, 0.7);
+  }
+
+  .cells {
+    position: absolute;
+    inset: var(--gap);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: var(--gap);
+    pointer-events: none;
+  }
+
+  .cells > div {
+    background: rgba(190, 215, 255, 0.045);
+    border: 1px solid rgba(190, 215, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  .tiles {
+    position: absolute;
+    inset: var(--gap);
+    pointer-events: none;
+  }
+
+  .tile {
+    position: absolute;
+    width: calc((100% - 3 * var(--gap)) / 4);
+    height: calc((100% - 3 * var(--gap)) / 4);
+    transform:
+      translate(
+        calc(var(--col) * (100% + var(--gap))),
+        calc(var(--row) * (100% + var(--gap)))
+      );
+    transition: transform 140ms cubic-bezier(0.3, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .tile-inner {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    font-size: 5.8cqw;
+    background: #dfe7f5;
+    color: #16204a;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 6px 16px -10px rgba(0, 0, 0, 0.9);
+    transition: transform 140ms cubic-bezier(0.3, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .tile-inner.small { font-size: 4.2cqw; }
+  .tile-inner.tiny  { font-size: 3.3cqw; }
+
+  /* Tile palette */
+  .tile[data-value="2"]    .tile-inner { background: #e7eefb; color: #16204a; }
+  .tile[data-value="4"]    .tile-inner { background: #cfdcf2; color: #16204a; }
+  .tile[data-value="8"]    .tile-inner {
+    background: linear-gradient(180deg, #6edaff, #4cc9f0);
+    color: #002133;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 0 22px -4px rgba(76, 201, 240, 0.7);
+  }
+  .tile[data-value="16"]   .tile-inner {
+    background: linear-gradient(180deg, #5ee7b3, #34d399);
+    color: #00321f;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 0 22px -4px rgba(52, 211, 153, 0.7);
+  }
+  .tile[data-value="32"]   .tile-inner {
+    background: linear-gradient(180deg, #fcd34d, #fbbf24);
+    color: #3d2600;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 0 24px -4px rgba(251, 191, 36, 0.75);
+  }
+  .tile[data-value="64"]   .tile-inner {
+    background: linear-gradient(180deg, #fdba74, #fb923c);
+    color: #3d1500;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 0 24px -4px rgba(251, 146, 60, 0.8);
+  }
+  .tile[data-value="128"]  .tile-inner {
+    background: linear-gradient(180deg, #fda4af, #fb7185);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 0 26px -4px rgba(251, 113, 133, 0.85);
+  }
+  .tile[data-value="256"]  .tile-inner {
+    background: linear-gradient(180deg, #f43f5e, #e11d48);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 30px -4px rgba(225, 29, 72, 0.9);
+  }
+  .tile[data-value="512"]  .tile-inner {
+    background: linear-gradient(180deg, #c4b5fd, #a78bfa);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 0 30px -4px rgba(167, 139, 250, 0.9);
+  }
+  .tile[data-value="1024"] .tile-inner {
+    background: linear-gradient(180deg, #a78bfa, #8b5cf6);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 0 34px -4px rgba(139, 92, 246, 0.95);
+  }
+  .tile[data-value="2048"] .tile-inner {
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 45%, #f59e0b 100%);
+    color: #3d2600;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      0 0 40px -2px rgba(251, 191, 36, 1),
+      0 0 80px -10px rgba(251, 191, 36, 0.7);
+    animation: champion-glow 2.6s ease-in-out infinite;
+  }
+  .tile[data-value="4096"] .tile-inner {
+    background: linear-gradient(135deg, #67e8f9, #22d3ee, #0ea5e9);
+    color: #001b24;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      0 0 40px -2px rgba(34, 211, 238, 1);
+  }
+  .tile[data-value="8192"] .tile-inner {
+    background: linear-gradient(135deg, #f9a8d4, #f472b6, #db2777);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 0 40px -2px rgba(244, 114, 182, 1);
+  }
+  .tile[data-value="16384"] .tile-inner,
+  .tile[data-value="32768"] .tile-inner,
+  .tile[data-value="65536"] .tile-inner {
+    background: linear-gradient(135deg, #c4b5fd, #7c3aed, #4c1d95);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 0 42px -2px rgba(124, 58, 237, 1);
+  }
+
+  @keyframes champion-glow {
+    0%, 100% {
+      filter: brightness(1);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 0 40px -2px rgba(251, 191, 36, 1),
+        0 0 80px -10px rgba(251, 191, 36, 0.7);
+    }
+    50% {
+      filter: brightness(1.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 0 54px -2px rgba(251, 191, 36, 1),
+        0 0 100px -10px rgba(251, 191, 36, 0.85);
+    }
+  }
+
+  /* Tile animations */
+  .tile.spawn .tile-inner {
+    animation: tile-spawn 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes tile-spawn {
+    0%   { transform: scale(0); opacity: 0; }
+    55%  { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .tile.merged .tile-inner {
+    animation: tile-merge 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes tile-merge {
+    0%   { transform: scale(1); }
+    38%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- Overlays ---------- */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3, 5, 20, 0.78);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    border-radius: 16px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 240ms ease;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .overlay-icon {
+    width: 68px;
+    height: 68px;
+    margin-bottom: 0.85rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line);
+    box-shadow: var(--glass-inset);
+    animation: badge-in 500ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  @keyframes badge-in {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .overlay-icon svg { width: 34px; height: 34px; }
+  .overlay-icon.win svg { color: #fbbf24; filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.8)); }
+  .overlay-icon.lose svg { color: #fb7185; filter: drop-shadow(0 0 16px rgba(251, 113, 133, 0.8)); }
+
+  .overlay h2 {
+    font-family: 'DM Serif Display', serif;
+    font-weight: normal;
+    font-size: 2.2rem;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+
+  .overlay-sub {
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+    margin-bottom: 1.1rem;
+    max-width: 320px;
+  }
+
+  .overlay-stats {
+    display: flex;
+    gap: 1.6rem;
+    margin-bottom: 1.4rem;
+    color: var(--ink-dim);
+    font-size: 0.82rem;
+  }
+
+  .overlay-stats strong {
+    display: block;
+    font-size: 1.5rem;
+    color: #fff;
+    font-weight: 800;
+    margin-top: 0.15rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .overlay-actions {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    appearance: none;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.68rem 1.6rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      border-color 200ms ease,
+      background 200ms ease,
+      transform 200ms ease,
+      box-shadow 200ms ease,
+      color 200ms ease;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    border: 1px solid rgba(190, 215, 255, 0.45);
+    background: linear-gradient(180deg, rgba(190, 215, 255, 0.22), rgba(190, 215, 255, 0.08));
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  .btn-primary:hover,
+  .btn-primary:focus-visible {
+    background: linear-gradient(180deg, rgba(190, 215, 255, 0.32), rgba(190, 215, 255, 0.12));
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 10px 24px -12px rgba(190, 215, 255, 0.6);
+    outline: none;
+  }
+
+  .btn-ghost {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ink-dim);
+  }
+
+  .btn-ghost:hover,
+  .btn-ghost:focus-visible {
+    border-color: var(--line-strong);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.09);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  /* ---------- Controls hint ---------- */
+  .controls-hint {
+    margin-top: 1.2rem;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    color: rgba(226, 240, 255, 0.4);
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+  }
+
+  .controls-hint span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .controls-hint kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 0.3rem;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(226, 240, 255, 0.7);
+    font-family: inherit;
+    font-size: 0.66rem;
+    font-weight: 700;
+  }
+
+  /* ---------- Footer ---------- */
+  .game-footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    text-align: center;
+    opacity: 0;
+    animation: fade-in 700ms ease-out 620ms forwards;
+  }
+
+  /* ---------- Animations ---------- */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(9px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes rule-draw {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .game-title,
+    .game-subline,
+    .header-rule,
+    .game-shell,
+    .game-footer {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+    }
+    .back-link,
+    .btn-new,
+    .btn-primary,
+    .btn-ghost,
+    .tile,
+    .tile-inner,
+    .overlay,
+    .score-value {
+      transition: none !important;
+    }
+    .tile.spawn .tile-inner,
+    .tile.merged .tile-inner,
+    .tile[data-value="2048"] .tile-inner,
+    .overlay-icon,
+    .score-value.pop,
+    .score-gain {
+      animation: none !important;
+    }
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 768px) {
+    .page { padding: 2rem 1rem 3rem; }
+    .game-title { font-size: 2.75rem; }
+    .game-shell { padding: 0.85rem; }
+    .g-hud { padding: 0.5rem; gap: 0.5rem; }
+    .score-box { min-width: 76px; padding: 0.3rem 0.75rem; }
+    .score-value { font-size: 0.95rem; }
+    .btn-new { padding: 0.55rem 1rem; font-size: 0.78rem; }
+  }
+
+  @media (max-width: 460px) {
+    .g-hud {
+      justify-content: center;
+    }
+    .g-hud-actions { width: 100%; justify-content: center; }
+  }
+  /* =========================================================
+     TOPBAR — transparent on load, glass bar on scroll
+     ========================================================= */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+  }
+
+  .topbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(6, 9, 28, 0.55);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border-bottom: 1px solid rgba(224, 242, 254, 0.12);
+    box-shadow: 0 24px 50px -40px rgba(0, 0, 0, 1);
+    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .topbar.is-scrolled::before {
+    opacity: 1;
+  }
+
+  .topbar-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.95rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: padding 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .topbar.is-scrolled .topbar-inner {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #fff;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .brand-mark {
+    width: 18px;
+    height: 18px;
+    color: #cfe3ff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .brand-mark .brand-star {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    animation: brand-star-pulse 3s ease-in-out infinite;
+  }
+
+  .brand-mark .brand-star::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(205,222,255,0.8) 20%, rgba(255,236,214,0.4) 50%, rgba(186,205,255,0.1) 80%, transparent 100%);
+    border-radius: 50%;
+    animation: brand-star-glow 2s ease-in-out infinite alternate;
+  }
+
+  .brand-mark svg {
+    display: none;
+  }
+
+  .topbar-links {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-left: auto;
+  }
+  .topbar-links::-webkit-scrollbar { display: none; }
+
+  .topbar-link {
+    flex-shrink: 0;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--ink-dim);
+    padding: 0.5rem 0.85rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: color 300ms ease;
+  }
+  .topbar-link:hover,
+  .topbar-link:focus-visible {
+    color: #fff;
+    outline: none;
+    background: transparent;
+  }
+
+  .layout-btn {
+    flex-shrink: 0;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink-dim);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease, transform 200ms ease;
+    margin-left: 0.35rem;
+  }
+  .layout-btn:hover,
+  .layout-btn:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+  .layout-btn:active { transform: scale(0.9); }
+  .layout-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
+  @keyframes brand-star-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  @keyframes brand-star-glow {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+
+    <!-- ============ TOPBAR ============ -->
+  <nav class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <a class="topbar-brand" href="/">
+        <span class="brand-mark" aria-hidden="true">
+          <div class="brand-star"></div>
+        </span>
+        <span>DUB5</span>
+      </a>
+      <div class="topbar-links">
+        <a class="topbar-link" href="/#games" data-nav="games">Games</a>
+        <a class="topbar-link" href="/#tools" data-nav="tools">Tools</a>
+        <a class="topbar-link" href="/#study" data-nav="study">Studie</a>
+        <a class="topbar-link" href="/#hacks" data-nav="hacks">Hacks</a>
+        <a class="topbar-link" href="/#guides" data-nav="guides">Uitleg</a>
+        <a class="topbar-link" href="/#gallery" data-nav="gallery">Galerij</a>
+      </div>
+      <button class="layout-btn" id="layoutBtn" title="Layout: Pill" aria-label="Layout wisselen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="7" rx="1.5"/>
+          <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+          <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <a class="back-link-fixed" href="/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5"/>
+        <path d="m12 19-7-7 7-7"/>
+      </svg>
+      Terug naar DUB5
+    </a>
+    <header class="game-header">
+      <h1 class="game-title">2048</h1>
+      <p class="game-subline">Schuif de tegels samen en bereik 2048.</p>
+    </header>
+
+    <div class="header-rule" aria-hidden="true"></div>
+
+    <section class="game-shell" aria-label="2048 spel">
+      <div class="g-hud">
+        <div class="g-hud-scores">
+          <div class="score-box">
+            <span class="score-label">Score</span>
+            <span class="score-value" id="scoreValue">0</span>
+          </div>
+          <div class="score-box">
+            <span class="score-label">Beste</span>
+            <span class="score-value" id="bestValue">0</span>
+          </div>
+        </div>
+        <div class="g-hud-actions">
+          <button class="btn-new" id="newGameBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+              <path d="M3 21v-5h5"/>
+            </svg>
+            Nieuw
+          </button>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board" aria-label="2048 bord" role="grid">
+          <div class="cells">
+            <div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div></div>
+          </div>
+          <div class="tiles" id="tiles"></div>
+
+          <!-- GAME OVER OVERLAY -->
+          <div class="overlay" id="overOverlay">
+            <div class="overlay-icon lose">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9.2"/>
+                <path d="M8.5 15.5s1.3-1.6 3.5-1.6 3.5 1.6 3.5 1.6"/>
+                <circle cx="9" cy="9.6" r="1.15" fill="currentColor" stroke="none"/>
+                <circle cx="15" cy="9.6" r="1.15" fill="currentColor" stroke="none"/>
+              </svg>
+            </div>
+            <h2>Game Over</h2>
+            <p class="overlay-sub">Geen zetten meer mogelijk.</p>
+            <div class="overlay-stats">
+              <div>Score<strong id="overScore">0</strong></div>
+              <div>Beste<strong id="overBest">0</strong></div>
+            </div>
+            <div class="overlay-actions">
+              <button class="btn-primary" id="overRetry" type="button">Opnieuw</button>
+            </div>
+          </div>
+
+          <!-- WIN OVERLAY -->
+          <div class="overlay" id="winOverlay">
+            <div class="overlay-icon win">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.2l2.94 6.02 6.63.92-4.79 4.63 1.13 6.6L12 17.25l-5.91 3.12 1.13-6.6-4.79-4.63 6.63-.92z"/>
+              </svg>
+            </div>
+            <h2>Je hebt 2048 gehaald!</h2>
+            <p class="overlay-sub">Blijf spelen voor een hogere score, of begin opnieuw.</p>
+            <div class="overlay-stats">
+              <div>Score<strong id="winScore">0</strong></div>
+            </div>
+            <div class="overlay-actions">
+              <button class="btn-primary" id="winContinue" type="button">Doorgaan</button>
+              <button class="btn-ghost" id="winNew" type="button">Nieuw spel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-hint">
+        <span><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> of <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+        <span>Veeg op mobiel</span>
+      </div>
+    </section>
+
+    <p class="game-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
+  </main>
+
+<script>
+/* =========================================================
+   1. STARFIELD (identical to DUB5 launcher)
+   ========================================================= */
+(function starfield() {
+  const canvas = document.getElementById('stars');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const TINTS = [
+    [255, 255, 255],
+    [205, 222, 255],
+    [255, 236, 214],
+    [186, 205, 255]
+  ];
+  const BASE_SIZE = [1.8, 3.2, 6.4, 11];
+
+  const spriteCache = new Map();
+  let flareSprite = null;
+
+  let W = 0, H = 0, dpr = 1;
+  let stars = [];
+  let shooting = null;
+  let nextShot = 3200;
+  let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
+  let lastT = performance.now();
+  let rafId = null;
+
+  function getSprite(tint, bucket) {
+    const key = tint + ':' + bucket;
+    const cached = spriteCache.get(key);
+    if (cached) return cached;
+
+    const radius = [1.5, 2.6, 4.6, 7.4][bucket];
+    const size = Math.max(2, Math.ceil(radius * 2));
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const g = c.getContext('2d');
+    const t = TINTS[tint];
+    const cx = size / 2;
+
+    const grad = g.createRadialGradient(cx, cx, 0, cx, cx, cx);
+    grad.addColorStop(0.00, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.14, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0.80)');
+    grad.addColorStop(0.38, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0.20)');
+    grad.addColorStop(0.72, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0.04)');
+    grad.addColorStop(1.00, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0)');
+
+    g.fillStyle = grad;
+    g.beginPath(); g.arc(cx, cx, cx, 0, Math.PI * 2); g.fill();
+
+    g.fillStyle = 'rgba(255,255,255,0.95)';
+    g.beginPath(); g.arc(cx, cx, Math.max(0.4, cx * 0.15), 0, Math.PI * 2); g.fill();
+
+    spriteCache.set(key, c);
+    return c;
+  }
+
+  function getFlare() {
+    if (flareSprite) return flareSprite;
+    const s = 64;
+    const c = document.createElement('canvas');
+    c.width = s; c.height = s;
+    const g = c.getContext('2d');
+    const mid = s / 2;
+
+    const h = g.createLinearGradient(0, mid, s, mid);
+    h.addColorStop(0, 'rgba(255,255,255,0)');
+    h.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+    h.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = h; g.fillRect(0, mid - 0.55, s, 1.1);
+
+    const v = g.createLinearGradient(mid, 0, mid, s);
+    v.addColorStop(0, 'rgba(255,255,255,0)');
+    v.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+    v.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = v; g.fillRect(mid - 0.55, 0, 1.1, s);
+
+    flareSprite = c;
+    return c;
+  }
+
+  function build() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const density = Math.round((W * H) / 1500);
+    const count = Math.min(1500, Math.max(420, density));
+
+    stars = [];
+    for (let i = 0; i < count; i++) {
+      const roll = Math.random();
+      let bucket = 0;
+      if (roll > 0.9955) bucket = 3;
+      else if (roll > 0.972) bucket = 2;
+      else if (roll > 0.85) bucket = 1;
+
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        depth: 0.25 + Math.random() * 0.75,
+        bucket: bucket,
+        tint: [0, 0, 0, 1, 3, 2][Math.floor(Math.random() * 6)],
+        base: 0.28 + Math.random() * 0.62,
+        speed: 0.35 + Math.random() * 1.5,
+        phase: Math.random() * Math.PI * 2,
+        angle: Math.random() * Math.PI,
+        hasFlare: bucket === 3
+      });
+    }
+  }
+
+  function spawnShooting() {
+    const goLeft = Math.random() > 0.5;
+    const speed = 380 + Math.random() * 320;
+    shooting = {
+      x: W * (0.15 + Math.random() * 0.7),
+      y: H * (0.05 + Math.random() * 0.35),
+      vx: (goLeft ? -1 : 1) * speed * 0.85,
+      vy: speed * 0.45,
+      life: 0,
+      max: 0.9 + Math.random() * 0.5
+    };
+  }
+
+  function draw(now) {
+    const t = now / 1000;
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+
+    ctx.clearRect(0, 0, W, H);
+    mouseX += (targetX - mouseX) * 0.045;
+    mouseY += (targetY - mouseY) * 0.045;
+    const px = mouseX * 16, py = mouseY * 16;
+
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const twinkle = 0.7 + 0.3 * Math.sin(t * s.speed + s.phase);
+      const alpha = Math.min(1, s.base * twinkle);
+      const size = BASE_SIZE[s.bucket] * (0.6 + s.depth * 0.8);
+      const x = s.x + px * s.depth;
+      const y = s.y + py * s.depth;
+
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(getSprite(s.tint, s.bucket), x - size / 2, y - size / 2, size, size);
+
+      if (s.hasFlare) {
+        const fs = size * 6;
+        ctx.globalAlpha = alpha * 0.3;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(s.angle);
+        ctx.drawImage(getFlare(), -fs / 2, -fs / 2, fs, fs);
+        ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    if (!reduceMotion) {
+      if (!shooting) {
+        nextShot -= dt * 1000;
+        if (nextShot <= 0) { spawnShooting(); nextShot = 7000 + Math.random() * 12000; }
+      } else {
+        const p = shooting;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life += dt;
+
+        const tailX = p.x - p.vx * 0.13;
+        const tailY = p.y - p.vy * 0.13;
+        const fade = Math.max(0, 1 - p.life / p.max);
+
+        const grad = ctx.createLinearGradient(p.x, p.y, tailX, tailY);
+        grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+        grad.addColorStop(0.35, 'rgba(190,220,255,0.32)');
+        grad.addColorStop(1, 'rgba(190,220,255,0)');
+
+        ctx.globalAlpha = fade;
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+
+        ctx.globalAlpha = fade * 0.85;
+        ctx.drawImage(getSprite(0, 3), p.x - 8, p.y - 8, 16, 16);
+        ctx.globalAlpha = 1;
+
+        if (p.life > p.max || p.x < -300 || p.x > W + 300 || p.y > H + 300) shooting = null;
+      }
+    }
+  }
+
+  function loop(now) { draw(now); rafId = requestAnimationFrame(loop); }
+
+  function start() {
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    lastT = performance.now();
+    if (reduceMotion) { draw(performance.now()); rafId = null; return; }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function stop() {
+    if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  let resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { build(); if (reduceMotion) draw(performance.now()); }, 140);
+  });
+
+  window.addEventListener('pointermove', function (e) {
+    targetX = (e.clientX / W) * 2 - 1;
+    targetY = (e.clientY / H) * 2 - 1;
+  }, { passive: true });
+
+  document.addEventListener('visibilitychange', function () {
+    if (reduceMotion) return;
+    if (document.hidden) stop(); else start();
+  });
+
+  build();
+  start();
+})();
+
+
+/* =========================================================
+   2. GAME STATE
+   ========================================================= */
+const tileLayer = document.getElementById('tiles');
+const boardEl = document.getElementById('board');
+const scoreValueEl = document.getElementById('scoreValue');
+const bestValueEl = document.getElementById('bestValue');
+const overOverlay = document.getElementById('overOverlay');
+const winOverlay = document.getElementById('winOverlay');
+
+const game = {
+  tiles: [],           // array of tile objects
+  grid: [],            // 4x4 array of tile references or null
+  score: 0,
+  best: 0,
+  over: false,
+  won: false,
+  keepPlaying: false,
+  busy: false,
+  nextId: 1
+};
+
+const SLIDE_MS = 140;
+
+/* Load best score */
+(function () {
+  try {
+    const v = parseInt(localStorage.getItem('dub5:2048:best') || '0', 10);
+    game.best = isNaN(v) ? 0 : v;
+  } catch (e) { game.best = 0; }
+  bestValueEl.textContent = String(game.best);
+})();
+
+function saveBest() {
+  try { localStorage.setItem('dub5:2048:best', String(game.best)); } catch (e) {}
+}
+
+
+/* =========================================================
+   3. HELPERS
+   ========================================================= */
+function emptyGrid() {
+  const g = [];
+  for (let r = 0; r < 4; r++) {
+    g.push([null, null, null, null]);
+  }
+  return g;
+}
+
+function updateGridFromTiles() {
+  game.grid = emptyGrid();
+  for (const t of game.tiles) {
+    if (!t.dead) {
+      game.grid[t.row][t.col] = t;
+    }
+  }
+}
+
+function setTileClassForValue(innerEl, value) {
+  innerEl.classList.remove('small', 'tiny');
+  if (value >= 10000) innerEl.classList.add('tiny');
+  else if (value >= 1000) innerEl.classList.add('small');
+}
+
+
+/* =========================================================
+   4. DOM TILE CREATION
+   ========================================================= */
+function createTileEl(tile) {
+  const el = document.createElement('div');
+  el.className = 'tile';
+  el.dataset.value = String(tile.value);
+  el.dataset.id = String(tile.id);
+  el.style.setProperty('--col', String(tile.col));
+  el.style.setProperty('--row', String(tile.row));
+
+  const inner = document.createElement('div');
+  inner.className = 'tile-inner';
+  inner.textContent = String(tile.value);
+  setTileClassForValue(inner, tile.value);
+
+  el.appendChild(inner);
+  tile.el = el;
+  tile.inner = inner;
+  return el;
+}
+
+function positionTileEl(tile) {
+  if (!tile.el) return;
+  tile.el.style.setProperty('--col', String(tile.col));
+  tile.el.style.setProperty('--row', String(tile.row));
+}
+
+function updateTileValueEl(tile) {
+  if (!tile.el) return;
+  tile.el.dataset.value = String(tile.value);
+  tile.inner.textContent = String(tile.value);
+  setTileClassForValue(tile.inner, tile.value);
+}
+
+function removeTileEl(tile) {
+  if (tile.el && tile.el.parentNode) {
+    tile.el.parentNode.removeChild(tile.el);
+  }
+}
+
+
+/* =========================================================
+   5. SPAWN
+   ========================================================= */
+function spawnTile() {
+  const empty = [];
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      if (!game.grid[r][c]) empty.push([r, c]);
+    }
+  }
+  if (empty.length === 0) return null;
+
+  const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+  const value = Math.random() < 0.9 ? 2 : 4;
+
+  const tile = {
+    id: game.nextId++,
+    value: value,
+    row: r,
+    col: c,
+    dead: false,
+    mergedThisTurn: false,
+    justMerged: false
+  };
+  game.tiles.push(tile);
+  game.grid[r][c] = tile;
+
+  const el = createTileEl(tile);
+  tileLayer.appendChild(el);
+  el.classList.add('spawn');
+  setTimeout(function () {
+    if (el.parentNode) el.classList.remove('spawn');
+  }, 240);
+
+  return tile;
+}
+
+
+/* =========================================================
+   6. MOVE
+   ========================================================= */
+function move(dir) {
+  if (game.busy || game.over) return;
+  if (game.won && !game.keepPlaying) return;
+
+  const isHoriz = dir === 'left' || dir === 'right';
+  const isRev = dir === 'right' || dir === 'down';
+
+  let moved = false;
+  let gained = 0;
+  const mergedPairs = [];
+
+  // Reset per-turn merge flags
+  for (const t of game.tiles) t.mergedThisTurn = false;
+
+  for (let line = 0; line < 4; line++) {
+    // Collect tiles in traversal order
+    const lineTiles = [];
+    for (let i = 0; i < 4; i++) {
+      const r = isHoriz ? line : i;
+      const c = isHoriz ? i : line;
+      const t = game.grid[r][c];
+      if (t) lineTiles.push(t);
+    }
+    if (isRev) lineTiles.reverse();
+
+    // Merge pass
+    const result = [];
+    let i = 0;
+    while (i < lineTiles.length) {
+      const a = lineTiles[i];
+      const b = lineTiles[i + 1];
+      if (b && a.value === b.value && !a.mergedThisTurn && !b.mergedThisTurn) {
+        a.mergedThisTurn = true;
+        b.mergedThisTurn = true;
+        a.pendingValue = a.value * 2;
+        mergedPairs.push({ a: a, b: b });
+        result.push(a);
+        gained += a.pendingValue;
+        i += 2;
+      } else {
+        result.push(a);
+        i += 1;
+      }
+    }
+
+    // Assign positions
+    for (let j = 0; j < result.length; j++) {
+      const t = result[j];
+      const pos = isRev ? 3 - j : j;
+      const nr = isHoriz ? line : pos;
+      const nc = isHoriz ? pos : line;
+      if (t.row !== nr || t.col !== nc) moved = true;
+      t.row = nr;
+      t.col = nc;
+    }
+  }
+
+  // Move merge partners to same target
+  for (const pair of mergedPairs) {
+    pair.b.row = pair.a.row;
+    pair.b.col = pair.a.col;
+  }
+
+  if (mergedPairs.length > 0) moved = true;
+  if (!moved) return;
+
+  // Lock input during animation
+  game.busy = true;
+
+  // Update grid immediately (b's are still in tiles but marked as dead later)
+  updateGridFromTiles();
+
+  // Animate slide
+  for (const t of game.tiles) positionTileEl(t);
+
+  // After slide finishes
+  setTimeout(function () {
+    // Remove merged partner tiles
+    for (const pair of mergedPairs) {
+      removeTileEl(pair.b);
+      pair.b.dead = true;
+      pair.b.el = null;
+
+      // Apply new value
+      pair.a.value = pair.a.pendingValue;
+      pair.a.pendingValue = undefined;
+      pair.a.justMerged = true;
+      updateTileValueEl(pair.a);
+
+      // Re-add merged pop class
+      if (pair.a.el) {
+        pair.a.el.classList.remove('merged');
+        // force reflow so animation restarts
+        void pair.a.el.offsetWidth;
+        pair.a.el.classList.add('merged');
+        setTimeout(function () {
+          if (pair.a.el) pair.a.el.classList.remove('merged');
+        }, 280);
+      }
+    }
+
+    // Drop dead tiles from array
+    game.tiles = game.tiles.filter(function (t) { return !t.dead; });
+    updateGridFromTiles();
+
+    // Add score
+    if (gained > 0) {
+      game.score += gained;
+      updateScore(gained);
+      if (game.score > game.best) {
+        game.best = game.score;
+        bestValueEl.textContent = String(game.best);
+        saveBest();
+      }
+    }
+
+    // Spawn a new tile
+    spawnTile();
+    updateGridFromTiles();
+
+    // Win check
+    if (!game.won) {
+      for (const t of game.tiles) {
+        if (t.value >= 2048) {
+          game.won = true;
+          showWinOverlay();
+          break;
+        }
+      }
+    }
+
+    // Game over check
+    if (!canMove()) {
+      game.over = true;
+      boardEl.classList.add('is-over');
+      showOverOverlay();
+    }
+
+    game.busy = false;
+  }, SLIDE_MS);
+}
+
+
+/* =========================================================
+   7. MOVE AVAILABILITY
+   ========================================================= */
+function canMove() {
+  // Any empty cell?
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      if (!game.grid[r][c]) return true;
+    }
+  }
+  // Any adjacent equal pair?
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      const t = game.grid[r][c];
+      if (!t) continue;
+      if (c < 3) {
+        const right = game.grid[r][c + 1];
+        if (right && right.value === t.value) return true;
+      }
+      if (r < 3) {
+        const down = game.grid[r + 1][c];
+        if (down && down.value === t.value) return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+/* =========================================================
+   8. SCORE UI
+   ========================================================= */
+function updateScore(gained) {
+  scoreValueEl.textContent = String(game.score);
+
+  if (gained && gained > 0) {
+    scoreValueEl.classList.remove('pop');
+    void scoreValueEl.offsetWidth;
+    scoreValueEl.classList.add('pop');
+
+    const box = scoreValueEl.parentElement;
+    const gain = document.createElement('span');
+    gain.className = 'score-gain';
+    gain.textContent = '+' + gained;
+    box.appendChild(gain);
+    setTimeout(function () { gain.remove(); }, 950);
+  }
+}
+
+
+/* =========================================================
+   9. OVERLAYS
+   ========================================================= */
+function showOverOverlay() {
+  document.getElementById('overScore').textContent = String(game.score);
+  document.getElementById('overBest').textContent = String(game.best);
+  overOverlay.classList.add('is-visible');
+}
+
+function hideOverOverlay() {
+  overOverlay.classList.remove('is-visible');
+}
+
+function showWinOverlay() {
+  boardEl.classList.add('is-won');
+  document.getElementById('winScore').textContent = String(game.score);
+  winOverlay.classList.add('is-visible');
+}
+
+function hideWinOverlay() {
+  winOverlay.classList.remove('is-visible');
+}
+
+
+/* =========================================================
+   10. NEW GAME
+   ========================================================= */
+function newGame() {
+  // Clear DOM
+  tileLayer.innerHTML = '';
+  game.tiles = [];
+  game.grid = emptyGrid();
+  game.score = 0;
+  game.over = false;
+  game.won = false;
+  game.keepPlaying = false;
+  game.busy = false;
+  game.nextId = 1;
+
+  boardEl.classList.remove('is-over', 'is-won');
+  hideOverOverlay();
+  hideWinOverlay();
+
+  scoreValueEl.textContent = '0';
+
+  spawnTile();
+  spawnTile();
+}
+
+
+/* =========================================================
+   11. INPUT
+   ========================================================= */
+const KEY_MAP = {
+  ArrowUp: 'up',
+  ArrowDown: 'down',
+  ArrowLeft: 'left',
+  ArrowRight: 'right',
+  w: 'up',
+  s: 'down',
+  a: 'left',
+  d: 'right',
+  W: 'up',
+  S: 'down',
+  A: 'left',
+  D: 'right'
+};
+
+document.addEventListener('keydown', function (e) {
+  const dir = KEY_MAP[e.key];
+  if (!dir) return;
+  e.preventDefault();
+
+  if (game.won && !game.keepPlaying && !game.over) {
+    // Ignore moves until player chooses continue or new game
+    return;
+  }
+  move(dir);
+});
+
+/* Touch swipe */
+(function touchControls() {
+  let startX = 0, startY = 0, tracking = false;
+  const THRESHOLD = 24;
+
+  boardEl.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    tracking = true;
+  }, { passive: true });
+
+  boardEl.addEventListener('touchmove', function (e) {
+    if (!tracking) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (Math.abs(dx) < THRESHOLD && Math.abs(dy) < THRESHOLD) return;
+
+    if (game.won && !game.keepPlaying && !game.over) {
+      tracking = false;
+      return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      move(dx > 0 ? 'right' : 'left');
+    } else {
+      move(dy > 0 ? 'down' : 'up');
+    }
+    tracking = false;
+  }, { passive: false });
+
+  boardEl.addEventListener('touchend', function () {
+    tracking = false;
+  });
+
+  boardEl.addEventListener('touchcancel', function () {
+    tracking = false;
+  });
+})();
+
+
+/* =========================================================
+   12. BUTTONS
+   ========================================================= */
+document.getElementById('newGameBtn').addEventListener('click', function () {
+  newGame();
+});
+
+document.getElementById('overRetry').addEventListener('click', function () {
+  newGame();
+});
+
+document.getElementById('winContinue').addEventListener('click', function () {
+  game.keepPlaying = true;
+  hideWinOverlay();
+  boardEl.classList.remove('is-won');
+});
+
+document.getElementById('winNew').addEventListener('click', function () {
+  newGame();
+});
+
+
+/* =========================================================
+   13. INIT
+   ========================================================= */
+newGame();
+// Topbar scroll effect
+const topbar = document.getElementById('topbar');
+if (topbar) {
+  let ticking = false;
+  function update() {
+    const y = window.scrollY || window.pageYOffset || 0;
+    topbar.classList.toggle('is-scrolled', y > 24);
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+  update();
+}
+</script>
+</body>
+</html>

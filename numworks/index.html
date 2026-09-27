@@ -1,0 +1,3327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUB5 - Numworks Scripts Manager</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+  :root {
+    --line: rgba(224, 242, 254, 0.16);
+    --line-strong: rgba(224, 242, 254, 0.30);
+    --ink: rgb(226, 240, 255);
+    --ink-dim: rgba(226, 240, 255, 0.60);
+    --ink-faint: rgba(226, 240, 255, 0.38);
+    --glass: rgba(9, 13, 38, 0.62);
+    --glass-hover: rgba(13, 19, 50, 0.72);
+    --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    --glass-shadow: 0 18px 40px -26px rgba(0, 0, 0, 1);
+    --glass-blur: blur(16px) saturate(160%);
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #fb7185;
+    --info: #4cc9f0;
+    --r-pill: 999px;
+    --r-panel: 18px;
+    --r-chip: 12px;
+    --dur: 300ms;
+    --ease: ease-in-out;
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+
+  ::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  .CodeMirror-vscrollbar, .CodeMirror-hscrollbar { display: none !important; }
+  .CodeMirror-scroll { overflow: auto !important; -ms-overflow-style: none; scrollbar-width: none; }
+  .CodeMirror-scroll::-webkit-scrollbar { display: none; }
+
+  body {
+    font-family: var(--font-ui);
+    background: radial-gradient(140% 100% at 50% -10%, #0b1150 0%, #050833 42%, #01030f 100%);
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -15%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(42% 34% at 16% 10%, rgba(70, 110, 255, 0.20), transparent 68%),
+      radial-gradient(38% 30% at 86% 16%, rgba(150, 80, 255, 0.15), transparent 66%),
+      radial-gradient(58% 42% at 52% 108%, rgba(0, 130, 230, 0.18), transparent 72%);
+    filter: blur(26px);
+  }
+
+  .stars {
+    position: fixed; inset: 0; z-index: 1;
+    width: 100%; height: 100%; pointer-events: none; display: block;
+  }
+
+  .glass {
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+  }
+
+  .hidden { display: none !important; }
+
+  /* =========================================================
+     LANDING SCREEN — minimal, no gradient on the play button
+     ========================================================= */
+  .landing-screen {
+    position: fixed; inset: 0; display: grid; place-items: center;
+    z-index: 50; padding: 24px;
+  }
+
+  .landing-card {
+    width: min(92vw, 540px);
+    padding: 3.4rem 2.25rem 3.2rem;
+    border-radius: 26px;
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), 0 30px 90px -30px rgba(0, 0, 0, 1);
+    text-align: center;
+    opacity: 0;
+    animation: card-in 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(9px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .landing-card h1 {
+    font-family: var(--font-display);
+    font-size: clamp(4.8rem, 12vw, 8rem);
+    line-height: 0.92;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(120, 170, 255, 0.28);
+  }
+
+  .landing-stars {
+    margin-top: 1rem;
+    font-size: clamp(1rem, 2.6vw, 1.4rem);
+    letter-spacing: 0.28em;
+    color: rgba(226, 240, 255, 0.9);
+    text-shadow: 0 0 22px rgba(160, 200, 255, 0.45);
+  }
+
+  .landing-tagline {
+    margin-top: 1.2rem;
+    font-size: 0.88rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.03em;
+  }
+
+  /* ---- Minimal DUB5 play button ---- */
+  .landing-enter {
+    margin-top: 2.25rem;
+    width: 76px;
+    height: 76px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    transition:
+      border-color var(--dur) var(--ease),
+      background var(--dur) var(--ease),
+      transform var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+    position: relative;
+  }
+
+  .landing-enter:hover,
+  .landing-enter:focus-visible {
+    background: var(--glass-hover);
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+    outline: none;
+    box-shadow:
+      var(--glass-inset),
+      0 22px 44px -22px rgba(190, 215, 255, 0.35),
+      0 18px 40px -26px rgba(0, 0, 0, 1);
+  }
+
+  .landing-enter:active {
+    transform: translateY(0);
+  }
+
+  .landing-enter:focus-visible {
+    outline: 2px solid rgba(224, 242, 254, 0.8);
+    outline-offset: 3px;
+  }
+
+  .landing-enter svg {
+    width: 26px;
+    height: 26px;
+    margin-left: 4px;
+    fill: currentColor;
+    stroke: none;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .landing-enter:hover svg {
+    transform: scale(1.06);
+  }
+
+  /* =========================================================
+     APP SHELL
+     ========================================================= */
+  .app-shell {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 4rem;
+  }
+  
+  .back-link-fixed {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 150;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    color: var(--ink-dim);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease, transform 200ms ease, background 200ms ease;
+  }
+  .back-link-fixed:hover, .back-link-fixed:focus-visible {
+    color: #fff;
+    border-color: var(--line-strong);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
+    outline: none;
+  }
+  .back-link-fixed:focus-visible { outline: 2px solid rgba(224, 242, 254, 0.8); outline-offset: 3px; }
+  .back-link-fixed svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 22px;
+    background: rgba(6, 9, 28, 0.55);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 12px 32px -20px rgba(0, 0, 0, 1);
+    z-index: 5;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+  }
+
+  .brand-mini {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2vw, 1.7rem);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 10px 4px 4px;
+    border-radius: var(--r-pill);
+    transition: background var(--dur) var(--ease);
+  }
+
+  .brand-star {
+    width: 22px;
+    height: 22px;
+    position: relative;
+    animation: brand-star-pulse 3s ease-in-out infinite;
+  }
+  
+  .brand-star::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(205,222,255,0.8) 20%, rgba(255,236,214,0.4) 50%, rgba(186,205,255,0.1) 80%, transparent 100%);
+    border-radius: 50%;
+    animation: brand-star-glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes brand-star-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  
+  @keyframes brand-star-glow {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  .brand-mini svg { display: none; }
+
+  .status {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.9rem; color: var(--ink);
+    padding: 0.5rem 0.95rem;
+    border-radius: var(--r-pill);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    box-shadow: var(--glass-inset);
+    min-width: 220px;
+    justify-content: center;
+  }
+
+  .status-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--danger);
+    box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.15), 0 0 12px rgba(251, 113, 133, 0.5);
+    flex: 0 0 auto;
+    transition: background 300ms ease, box-shadow 300ms ease;
+  }
+
+  .status-dot.connected {
+    background: var(--success);
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15), 0 0 12px rgba(52, 211, 153, 0.6);
+  }
+
+  .status-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* =========================================================
+     BUTTONS
+     ========================================================= */
+  button {
+    appearance: none; font: inherit;
+    background: var(--glass);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    padding: 0.68rem 0.95rem;
+    border-radius: var(--r-chip);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition:
+      transform var(--dur) var(--ease),
+      background var(--dur) var(--ease),
+      border-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+    box-shadow: var(--glass-inset);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  button:hover {
+    background: var(--glass-hover);
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--glass-inset), 0 12px 26px -18px rgba(0, 0, 0, 1);
+  }
+
+  button:active { transform: translateY(0); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  button:focus-visible {
+    outline: 2px solid rgba(224, 242, 254, 0.8);
+    outline-offset: 3px;
+  }
+
+  button.primary {
+    background: linear-gradient(180deg, rgba(190, 215, 255, 0.22), rgba(190, 215, 255, 0.08));
+    border-color: rgba(190, 215, 255, 0.45);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  .icon-btn { width: 44px; height: 44px; padding: 0; border-radius: var(--r-chip); }
+  .icon-btn.small { width: 36px; height: 36px; border-radius: 10px; }
+
+  .icon-btn svg, .tab-close svg, .status-pill svg, .market-action svg,
+  .tree-script-left svg, .tree-version-left svg, .tab svg, .notification svg {
+    width: 20px; height: 20px;
+    fill: none; stroke: currentColor;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    flex: 0 0 auto;
+  }
+
+  /* =========================================================
+     MAIN GRID
+     ========================================================= */
+  .main-content {
+    display: grid;
+    grid-template-columns: var(--left-width, 350px) minmax(0, 1fr) var(--right-width, 310px);
+    grid-template-rows: 1fr;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    padding: 1rem;
+    min-height: 0;
+    width: 100%;
+    transition: all 300ms ease;
+  }
+
+  .sidebar-left, .sidebar-right, .editor-area {
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    min-height: 0;
+    grid-row: 1;
+    position: relative;
+    transition: all 300ms ease;
+  }
+
+  .sidebar-left {
+    border-radius: var(--r-panel) 0 0 var(--r-panel);
+    border-right: 2px solid var(--line);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-left:hover {
+    border-right-color: var(--line-strong);
+  }
+  .sidebar-left.hidden {
+    display: none;
+  }
+
+  .sidebar-right {
+    border-radius: 0 var(--r-panel) var(--r-panel) 0;
+    border-left: 2px solid var(--line);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-right:hover {
+    border-left-color: var(--line-strong);
+  }
+  .sidebar-right.hidden {
+    display: none;
+  }
+
+  .editor-area {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+  }
+  .editor-area.hidden {
+    display: none;
+  }
+
+  .resizer-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    z-index: 20;
+    cursor: col-resize;
+    transition: background 200ms ease;
+  }
+  .resizer-handle:hover {
+    background: rgba(224, 242, 254, 0.3);
+  }
+  .resizer-handle.resizing {
+    background: rgba(224, 242, 254, 0.5);
+  }
+  .resizer-handle.hidden {
+    display: none;
+  }
+
+  .resizer-handle-left {
+    right: -3px;
+  }
+
+  .resizer-handle-right {
+    left: -3px;
+  }
+
+  /* Toggle buttons */
+  .toggle-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+  .toggle-btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--r-chip);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--ink-dim);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 200ms ease;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .toggle-btn:hover {
+    color: var(--ink);
+    border-color: var(--line-strong);
+    background: var(--glass-hover);
+  }
+  .toggle-btn.active {
+    color: var(--ink);
+    border-color: var(--success);
+    background: rgba(52, 211, 153, 0.12);
+  }
+  .toggle-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .sidebar-header, .editor-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .sidebar-header span:first-child {
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    color: rgba(226, 240, 255, 0.75);
+  }
+
+  .header-actions, .editor-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* ---------- TREE ---------- */
+  .tree-scroll, .market-scroll {
+    flex: 1; overflow-y: auto; padding: 10px; min-height: 0;
+  }
+
+  .tree-node {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--r-chip);
+    overflow: hidden; margin-bottom: 8px;
+    transition: border-color 220ms ease, box-shadow 220ms ease;
+  }
+
+  .tree-node.active {
+    border-color: rgba(190, 215, 255, 0.55);
+    box-shadow: 0 0 0 2px rgba(190, 215, 255, 0.1), 0 12px 30px -20px rgba(0, 0, 0, 1);
+  }
+
+  .tree-script-row, .tree-version-row {
+    width: 100%; border: none; background: transparent; box-shadow: none;
+    justify-content: space-between; text-align: left;
+    border-radius: 0; padding: 0.75rem 0.85rem;
+    color: var(--ink); font-weight: 600; font-size: 0.88rem;
+  }
+
+  .tree-script-row:hover, .tree-version-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: none; box-shadow: none; border-color: transparent;
+  }
+
+  .tree-script-left, .tree-version-left {
+    display: flex; align-items: center; gap: 0.55rem; min-width: 0;
+  }
+
+  .tree-script-left svg, .tree-version-left svg {
+    width: 16px; height: 16px; color: rgba(226, 240, 255, 0.6);
+  }
+
+  .tree-script-name, .tree-version-name, .market-name {
+    min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .tree-script-meta, .tree-version-meta {
+    color: var(--ink-dim); font-size: 0.72rem;
+    white-space: nowrap; flex: 0 0 auto;
+    font-weight: 600; letter-spacing: 0.02em;
+  }
+
+  .tree-versions {
+    border-top: 1px solid var(--line);
+    padding: 0.35rem 0 0.45rem;
+    display: none; background: rgba(0, 0, 0, 0.12);
+  }
+
+  .tree-node.expanded .tree-versions { display: block; }
+  .tree-node.expanded .caret { transform: rotate(90deg); }
+  .caret { transition: transform 0.18s ease; opacity: 0.75; }
+
+  .tree-version-row {
+    padding-left: 1.9rem; font-weight: 500;
+    color: rgba(226, 240, 255, 0.8); font-size: 0.82rem;
+  }
+
+  .tree-version-row.current {
+    background: rgba(190, 215, 255, 0.08);
+    box-shadow: inset 3px 0 0 rgba(190, 215, 255, 0.55);
+  }
+
+  .tree-version-row.published .tree-version-meta { color: rgba(52, 211, 153, 0.95); }
+
+  .empty-state {
+    padding: 1.35rem 1rem; text-align: center;
+    color: var(--ink-dim); font-size: 0.85rem; line-height: 1.55;
+  }
+
+  /* ---------- TABS ---------- */
+  .tabs {
+    display: flex; gap: 0.4rem;
+    padding: 0.6rem 0.6rem 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.015);
+    min-height: 50px;
+  }
+
+  .tab {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid var(--line); border-bottom: none;
+    padding: 0.6rem 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(226, 240, 255, 0.75);
+    min-width: 0; max-width: 260px; flex: 0 0 auto;
+    box-shadow: none; font-weight: 600; font-size: 0.82rem;
+  }
+
+  .tab.active {
+    background: var(--glass); color: #fff;
+    border-color: var(--line-strong);
+    transform: translateY(1px);
+    box-shadow: var(--glass-inset);
+  }
+
+  .tab svg { width: 15px; height: 15px; color: rgba(226, 240, 255, 0.55); }
+  .tab.active svg { color: rgba(226, 240, 255, 0.9); }
+
+  .tab-title {
+    min-width: 0; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; max-width: 180px;
+  }
+
+  .tab-dirty {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--warning);
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+    flex: 0 0 auto;
+  }
+
+  .tab-close {
+    width: 22px; height: 22px; border-radius: 50%; padding: 0;
+    margin-left: 0.25rem; background: transparent;
+    border-color: transparent; color: rgba(226, 240, 255, 0.6);
+    box-shadow: none; min-width: 0;
+  }
+
+  .tab-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: transparent; transform: none; box-shadow: none;
+  }
+
+  .tab-close svg { width: 12px; height: 12px; }
+
+  /* ---------- EDITOR ---------- */
+  .editor-meta {
+    display: flex; align-items: center; gap: 10px;
+    min-width: 0; flex: 1;
+  }
+
+  .script-name-input {
+    background: transparent; border: none; color: #fff;
+    font-size: 1rem; font-weight: 600;
+    flex: 1; outline: none; min-width: 0;
+    text-overflow: ellipsis; padding: 6px 8px;
+    border-radius: 6px;
+    transition: background 200ms ease, box-shadow 200ms ease;
+    font-family: var(--font-ui);
+    width: 100%;
+  }
+
+  .script-name-input::placeholder { color: var(--ink-faint); }
+  .script-name-input:focus {
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 -2px 0 rgba(190, 215, 255, 0.5);
+  }
+  .script-name-input:disabled { color: var(--ink-dim); cursor: default; }
+  .script-name-input.hidden { 
+    display: none !important; 
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .unsaved-indicator {
+    color: var(--warning); font-size: 0.78rem;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    white-space: nowrap; flex: 0 0 auto; font-weight: 600;
+  }
+  .unsaved-indicator.saved {
+    color: var(--success);
+  }
+
+  .editor-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+
+  .editor-empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-dim);
+    font-size: 1rem;
+    text-align: center;
+    background: var(--glass);
+    z-index: 5;
+  }
+  .editor-empty-state.hidden {
+    display: none;
+  }
+  .editor-empty-state p {
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  .CodeMirror {
+    flex: 1; height: auto !important;
+    font-family: var(--font-mono); font-size: 13.5px;
+    background: rgba(2, 4, 16, 0.5); color: #e2f0ff; line-height: 1.6;
+  }
+  .CodeMirror.hidden {
+    display: none;
+  }
+  #code-editor {
+    display: none;
+  }
+
+  .CodeMirror-gutters {
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 1px solid var(--line);
+  }
+
+  .CodeMirror-linenumber { color: rgba(226, 240, 255, 0.28); }
+  .CodeMirror-cursor { border-left: 2px solid #cfe3ff !important; }
+  .CodeMirror-selected { background: rgba(96, 165, 250, 0.22) !important; }
+
+  .cm-s-dracula.CodeMirror,
+  .cm-s-dracula .CodeMirror-gutters {
+    background: transparent !important; color: #e2f0ff;
+  }
+
+  .cm-s-dracula .cm-keyword { color: #a78bfa; }
+  .cm-s-dracula .cm-def { color: #4cc9f0; }
+  .cm-s-dracula .cm-string { color: #34d399; }
+  .cm-s-dracula .cm-number { color: #fbbf24; }
+  .cm-s-dracula .cm-comment { color: rgba(226, 240, 255, 0.4); font-style: italic; }
+  .cm-s-dracula .cm-operator { color: #fb7185; }
+  .cm-s-dracula .cm-builtin { color: #4cc9f0; }
+
+  /* ---------- MARKETPLACE ---------- */
+  .market-search { display: flex; gap: 8px; padding: 12px 12px 0; }
+
+  .market-search input, .modal-input {
+    width: 100%; padding: 0.78rem 0.95rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line); color: var(--ink);
+    border-radius: var(--r-chip); outline: none;
+    font-size: 0.9rem; font-family: inherit;
+    transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  }
+
+  .market-search input::placeholder, .modal-input::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .market-search input:focus, .modal-input:focus {
+    border-color: rgba(190, 215, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(190, 215, 255, 0.1);
+  }
+
+  .market-results { padding: 0.75rem 0.8rem 1rem; }
+
+  .market-card {
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--r-chip);
+    padding: 0.85rem; margin-bottom: 0.65rem;
+    display: flex; flex-direction: column; gap: 0.7rem;
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+
+  .market-card:hover {
+    border-color: var(--line-strong);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .market-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px;
+  }
+
+  .market-title {
+    font-size: 0.92rem; font-weight: 700; color: #fff;
+    min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .market-subtitle {
+    margin-top: 0.25rem; font-size: 0.78rem;
+    color: var(--ink-dim); line-height: 1.4;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .market-action { width: 38px; height: 38px; border-radius: 10px; padding: 0; flex: 0 0 auto; }
+  .market-action svg { width: 16px; height: 16px; }
+
+  /* ---------- NOTIFICATIONS ---------- */
+  #notification-area {
+    position: fixed; bottom: 20px; right: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 1000; pointer-events: none;
+  }
+
+  .notification {
+    padding: 12px 16px; border-radius: var(--r-chip);
+    color: #fff; font-weight: 600; font-size: 0.88rem;
+    animation: slideIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: var(--glass-inset), 0 14px 40px -14px rgba(0, 0, 0, 1);
+    max-width: 420px; display: flex; align-items: center; gap: 10px;
+    border: 1px solid var(--line); pointer-events: auto;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+  }
+
+  .notification svg { width: 16px; height: 16px; stroke: currentColor; fill: none; flex: 0 0 auto; }
+  .notification.info { background: linear-gradient(180deg, rgba(76, 201, 240, 0.95), rgba(26, 122, 158, 0.95)); }
+  .notification.success { background: linear-gradient(180deg, rgba(52, 211, 153, 0.95), rgba(15, 155, 108, 0.95)); }
+  .notification.error { background: linear-gradient(180deg, rgba(251, 113, 133, 0.95), rgba(190, 18, 60, 0.95)); }
+  .notification.warning { background: linear-gradient(180deg, rgba(251, 191, 36, 0.95), rgba(180, 83, 9, 0.95)); color: #1a1000; }
+
+  @keyframes slideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(3, 5, 20, 0.78);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    display: grid; place-items: center;
+    z-index: 2000; padding: 20px;
+    animation: overlay-in 200ms ease;
+  }
+
+  @keyframes overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    width: min(92vw, 480px);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: var(--r-panel);
+    padding: 1.5rem;
+    box-shadow: var(--glass-inset), 0 30px 80px -20px rgba(0, 0, 0, 1);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    animation: card-in 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .modal h3 {
+    margin-bottom: 1.1rem;
+    font-family: var(--font-display); font-weight: 400;
+    font-size: 1.9rem; color: #fff; letter-spacing: 0.01em;
+  }
+
+  .modal label {
+    display: block; margin: 0.6rem 0 0.4rem;
+    font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .modal-checkbox-label {
+    display: flex !important; align-items: center;
+    gap: 0.6rem; margin: 1rem 0 !important;
+    text-transform: none; letter-spacing: 0;
+    font-size: 0.9rem; color: var(--ink);
+    cursor: pointer; font-weight: 500;
+  }
+
+  .modal-checkbox-label input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--info); cursor: pointer;
+  }
+
+  .modal-actions {
+    display: flex; justify-content: flex-end;
+    gap: 10px; margin-top: 1.3rem;
+  }
+
+  /* ---------- STATUS PILL ---------- */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.5rem 0.8rem; border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.78rem; font-weight: 600; color: var(--ink);
+    margin: 0.75rem 0.8rem 0;
+  }
+
+  .status-pill.success { color: var(--success); border-color: rgba(52, 211, 153, 0.35); }
+  .status-pill.error { color: var(--danger); border-color: rgba(251, 113, 133, 0.35); }
+  .status-pill.warning { color: var(--warning); border-color: rgba(251, 191, 36, 0.35); }
+  .status-pill svg { width: 14px; height: 14px; }
+
+  /* ---------- READ-ONLY HINT ---------- */
+  .readonly-hint {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 3px 9px; border-radius: var(--r-pill);
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--warning);
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    white-space: nowrap; flex: 0 0 auto;
+  }
+
+  /* ---------- CONTEXT MENU ---------- */
+  .context-menu {
+    position: fixed;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: var(--r-chip);
+    padding: 0.4rem 0; z-index: 3000; min-width: 160px;
+    box-shadow: var(--glass-inset), 0 20px 50px -20px rgba(0, 0, 0, 1);
+    overflow: hidden;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+  }
+
+  .context-menu-item {
+    padding: 0.65rem 1rem; cursor: pointer;
+    font-size: 0.86rem; font-weight: 600; color: var(--ink);
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: background 160ms ease;
+  }
+
+  .context-menu-item:hover { background: rgba(255, 255, 255, 0.08); }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 1100px) {
+    .main-content { grid-template-columns: 260px minmax(0, 1fr); }
+    .sidebar-right { display: none; }
+  }
+
+  @media (max-width: 860px) {
+    body { overflow: auto; }
+    .app-shell { min-height: 100vh; height: auto; }
+    .top-bar { flex-wrap: wrap; }
+    .status { order: 3; width: 100%; justify-content: center; min-width: 0; }
+    .main-content { grid-template-columns: 1fr; height: auto; overflow: visible; }
+    .sidebar-left { order: 2; }
+    .editor-area { order: 1; min-height: 70vh; }
+    .sidebar-right { display: flex; order: 3; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-card, .modal, .notification { animation: none !important; }
+    button, .tab, .tree-node, .market-card, .landing-enter { transition: none !important; }
+  }
+  
+  /* =========================================================
+     GLOBAL TOPBAR
+     ========================================================= */
+  .global-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+
+  .global-topbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(6, 9, 28, 0.55);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border-bottom: 1px solid rgba(224, 242, 254, 0.12);
+    box-shadow: 0 24px 50px -40px rgba(0, 0, 0, 1);
+    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .global-topbar.is-scrolled::before {
+    opacity: 1;
+  }
+
+  .global-topbar-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.95rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: padding 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .global-topbar.is-scrolled .global-topbar-inner {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .global-topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #fff;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .global-brand-mark {
+    width: 18px;
+    height: 18px;
+    color: #cfe3ff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  
+  .global-brand-mark .brand-star {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    animation: brand-star-pulse 3s ease-in-out infinite;
+  }
+  
+  .global-brand-mark .brand-star::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(205,222,255,0.8) 20%, rgba(255,236,214,0.4) 50%, rgba(186,205,255,0.1) 80%, transparent 100%);
+    border-radius: 50%;
+    animation: brand-star-glow 2s ease-in-out infinite alternate;
+  }
+
+  .global-topbar-links {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-left: auto;
+  }
+  .global-topbar-links::-webkit-scrollbar { display: none; }
+
+  .global-topbar-link {
+    flex-shrink: 0;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: rgba(226, 240, 255, 0.6);
+    padding: 0.5rem 0.85rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: color 300ms ease;
+  }
+  .global-topbar-link:hover,
+  .global-topbar-link:focus-visible {
+    color: #fff;
+    outline: none;
+    background: transparent;
+  }
+
+  .global-layout-btn {
+    flex-shrink: 0;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(226, 240, 255, 0.6);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease, transform 200ms ease;
+    margin-left: 0.35rem;
+  }
+  .global-layout-btn:hover,
+  .global-layout-btn:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+  .global-layout-btn:active { transform: scale(0.9); }
+  .global-layout-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  
+  @keyframes brand-star-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  
+  @keyframes brand-star-glow {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<canvas class="stars" id="stars" aria-hidden="true"></canvas>
+
+<!-- ============ GLOBAL TOPBAR ============ -->
+<nav class="global-topbar" id="globalTopbar">
+  <div class="global-topbar-inner">
+    <a class="global-topbar-brand" href="/">
+      <span class="global-brand-mark" aria-hidden="true">
+        <div class="brand-star"></div>
+      </span>
+      <span>DUB5</span>
+    </a>
+    <div class="global-topbar-links">
+      <a class="global-topbar-link" href="/#games" data-nav="games">Games</a>
+      <a class="global-topbar-link" href="/#tools" data-nav="tools">Tools</a>
+      <a class="global-topbar-link" href="/#study" data-nav="study">Studie</a>
+      <a class="global-topbar-link" href="/#hacks" data-nav="hacks">Hacks</a>
+      <a class="global-topbar-link" href="/#guides" data-nav="guides">Uitleg</a>
+      <a class="global-topbar-link" href="/#gallery" data-nav="gallery">Galerij</a>
+    </div>
+    <button class="global-layout-btn" id="globalLayoutBtn" title="Layout: Pill" aria-label="Layout wisselen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="7" rx="1.5"/>
+        <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+        <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<a class="back-link-fixed" href="/">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5"/>
+    <path d="m12 19-7-7 7-7"/>
+  </svg>
+  Terug naar DUB5
+</a>
+
+<section id="landing-screen" class="landing-screen">
+  <div class="landing-card">
+    <h1>DUB5</h1>
+    <div class="landing-stars" aria-label="Premium quality rating">★★★★★</div>
+    <p class="landing-tagline">Numworks Scripts Manager</p>
+    <button id="btn-enter" class="landing-enter" aria-label="Enter the script manager">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+  </div>
+</section>
+
+<div id="app-shell" class="app-shell hidden">
+  <header class="top-bar">
+    <div class="brand-mini">
+      <div class="brand-star"></div>
+      <span>DUB5</span>
+    </div>
+    <div class="status" id="calc-status" title="Calculator connection status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text" class="status-label">Not connected</span>
+    </div>
+    <div class="toggle-buttons">
+      <button id="toggle-explorer" class="toggle-btn active" title="Toggle Explorer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>
+        </svg>
+        Explorer
+      </button>
+      <button id="toggle-editor" class="toggle-btn active" title="Toggle Editor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Editor
+      </button>
+      <button id="toggle-marketplace" class="toggle-btn active" title="Toggle Marketplace">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Marketplace
+      </button>
+    </div>
+    <div class="actions">
+      <button id="btn-connect" class="icon-btn" title="Connect calculator" aria-label="Connect calculator"></button>
+      <button id="btn-upload" class="icon-btn" title="Load to calculator" aria-label="Load to calculator"></button>
+      <button id="btn-export" class="icon-btn" title="Export ZIP" aria-label="Export ZIP"></button>
+      <button id="btn-settings" class="icon-btn" title="Settings" aria-label="Settings"></button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <aside class="sidebar-left">
+      <div class="resizer-handle resizer-handle-left" id="resizer-left"></div>
+      <div class="sidebar-header">
+        <span>Explorer</span>
+        <div class="header-actions">
+          <button id="btn-new-script" class="icon-btn small" title="New script" aria-label="New script"></button>
+          <button id="btn-import-py" class="icon-btn small" title="Import Python file (.py)" aria-label="Import Python file (.py)"></button>
+          <input type="file" id="file-import" accept=".py" style="display:none">
+        </div>
+      </div>
+      <div class="tree-scroll" id="script-tree">
+        <div class="empty-state">No scripts yet</div>
+      </div>
+    </aside>
+
+    <section class="editor-area">
+      <div class="editor-header">
+        <div class="editor-meta">
+          <input type="text" id="script-name-input" class="script-name-input hidden" placeholder="" disabled>
+          <span id="unsaved-indicator" class="unsaved-indicator hidden">● Unsaved changes</span>
+          <span id="readonly-hint" class="readonly-hint hidden">Read-only</span>
+        </div>
+        <div class="editor-actions">
+          <button id="btn-save-version" class="icon-btn" title="Save version" aria-label="Save version"></button>
+          <button id="btn-publish" class="icon-btn" title="Publish" aria-label="Publish"></button>
+        </div>
+      </div>
+      <div class="tabs" id="tab-strip"></div>
+      <div class="editor-wrap">
+        <div id="editor-empty-state" class="editor-empty-state">
+          <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.6;">
+            <path d="M9 21V13.6C9 13.0399 9 12.7599 9.10899 12.546C9.20487 12.3578 9.35785 12.2049 9.54601 12.109C9.75992 12 10.0399 12 10.6 12H13.4C13.9601 12 14.2401 12 14.454 12.109C14.6422 12.2049 14.7951 12.3578 14.891 12.546C15 12.7599 15 13.0399 15 13.6V21M11.0177 2.764L4.23539 8.03912C3.78202 8.39175 3.55534 8.56806 3.39203 8.78886C3.24737 8.98444 3.1396 9.20478 3.07403 9.43905C3 9.70352 3 9.9907 3 10.5651V17.8C3 18.9201 3 19.4801 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4801 21 18.9201 21 17.8V10.5651C21 9.9907 21 9.70352 20.926 9.43905C20.8604 9.20478 20.7526 8.98444 20.608 8.78886C20.4447 8.56806 20.218 8.39175 19.7646 8.03913L12.9823 2.764C12.631 2.49075 12.4553 2.35412 12.2613 2.3016C12.0902 2.25526 11.9098 2.25526 11.7387 2.3016C11.5447 2.35412 11.369 2.49075 11.0177 2.764Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>Select a file or make a new one</p>
+        </div>
+        <textarea id="code-editor"></textarea>
+      </div>
+    </section>
+
+    <aside class="sidebar-right">
+      <div class="resizer-handle resizer-handle-right" id="resizer-right"></div>
+      <div class="sidebar-header">
+        <span>Marketplace</span>
+        <div class="header-actions">
+          <button id="btn-market-refresh" class="icon-btn small" title="Refresh marketplace" aria-label="Refresh marketplace"></button>
+        </div>
+      </div>
+      <div class="market-search">
+        <input id="market-search-input" type="text" placeholder="Search free scripts">
+        <button id="btn-market-search" class="icon-btn small" title="Search marketplace" aria-label="Search marketplace"></button>
+      </div>
+      <div id="market-status" class="status-pill hidden"></div>
+      <div class="market-scroll" id="market-results">
+        <div class="empty-state">Search the free library of shared scripts.</div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div id="notification-area"></div>
+<div id="modal-root"></div>
+
+<div id="context-menu" class="context-menu hidden">
+  <div class="context-menu-item" data-action="rename">Rename</div>
+  <div class="context-menu-item" data-action="duplicate">Duplicate</div>
+  <div class="context-menu-item" data-action="delete" style="color: var(--danger);">Delete</div>
+</div>
+
+<!-- =========================================================
+     STARFIELD
+     ========================================================= -->
+<script>
+(function starfield() {
+  const canvas = document.getElementById('stars');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TINTS = [[255,255,255],[205,222,255],[255,236,214],[186,205,255]];
+  const BASE_SIZE = [1.8, 3.2, 6.4, 11];
+  const spriteCache = new Map();
+  let flareSprite = null;
+  let W = 0, H = 0, dpr = 1;
+  let stars = [];
+  let shooting = null;
+  let nextShot = 3200;
+  let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
+  let lastT = performance.now();
+  let rafId = null;
+
+  function getSprite(tint, bucket) {
+    const key = tint + ':' + bucket;
+    const cached = spriteCache.get(key);
+    if (cached) return cached;
+    const radius = [1.5, 2.6, 4.6, 7.4][bucket];
+    const size = Math.max(2, Math.ceil(radius * 2));
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const g = c.getContext('2d');
+    const t = TINTS[tint];
+    const cx = size / 2;
+    const grad = g.createRadialGradient(cx, cx, 0, cx, cx, cx);
+    grad.addColorStop(0.00, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.14, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0.80)');
+    grad.addColorStop(0.38, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0.20)');
+    grad.addColorStop(0.72, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0.04)');
+    grad.addColorStop(1.00, 'rgba(' + t[0] + ',' + t[1] + ',' + t[2] + ',0)');
+    g.fillStyle = grad;
+    g.beginPath(); g.arc(cx, cx, cx, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.95)';
+    g.beginPath(); g.arc(cx, cx, Math.max(0.4, cx * 0.15), 0, Math.PI * 2); g.fill();
+    spriteCache.set(key, c);
+    return c;
+  }
+
+  function getFlare() {
+    if (flareSprite) return flareSprite;
+    const s = 64;
+    const c = document.createElement('canvas');
+    c.width = s; c.height = s;
+    const g = c.getContext('2d');
+    const mid = s / 2;
+    const h = g.createLinearGradient(0, mid, s, mid);
+    h.addColorStop(0, 'rgba(255,255,255,0)');
+    h.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+    h.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = h; g.fillRect(0, mid - 0.55, s, 1.1);
+    const v = g.createLinearGradient(mid, 0, mid, s);
+    v.addColorStop(0, 'rgba(255,255,255,0)');
+    v.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+    v.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = v; g.fillRect(mid - 0.55, 0, 1.1, s);
+    flareSprite = c;
+    return c;
+  }
+
+  function build() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const density = Math.round((W * H) / 1500);
+    const count = Math.min(1500, Math.max(420, density));
+    stars = [];
+    for (let i = 0; i < count; i++) {
+      const roll = Math.random();
+      let bucket = 0;
+      if (roll > 0.9955) bucket = 3;
+      else if (roll > 0.972) bucket = 2;
+      else if (roll > 0.85) bucket = 1;
+      stars.push({
+        x: Math.random() * W, y: Math.random() * H,
+        depth: 0.25 + Math.random() * 0.75, bucket: bucket,
+        tint: [0,0,0,1,3,2][Math.floor(Math.random() * 6)],
+        base: 0.28 + Math.random() * 0.62,
+        speed: 0.35 + Math.random() * 1.5,
+        phase: Math.random() * Math.PI * 2,
+        angle: Math.random() * Math.PI,
+        hasFlare: bucket === 3
+      });
+    }
+  }
+
+  function spawnShooting() {
+    const goLeft = Math.random() > 0.5;
+    const speed = 380 + Math.random() * 320;
+    shooting = {
+      x: W * (0.15 + Math.random() * 0.7),
+      y: H * (0.05 + Math.random() * 0.35),
+      vx: (goLeft ? -1 : 1) * speed * 0.85,
+      vy: speed * 0.45, life: 0, max: 0.9 + Math.random() * 0.5
+    };
+  }
+
+  function draw(now) {
+    const t = now / 1000;
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+    ctx.clearRect(0, 0, W, H);
+    mouseX += (targetX - mouseX) * 0.045;
+    mouseY += (targetY - mouseY) * 0.045;
+    const px = mouseX * 16, py = mouseY * 16;
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const twinkle = 0.7 + 0.3 * Math.sin(t * s.speed + s.phase);
+      const alpha = Math.min(1, s.base * twinkle);
+      const size = BASE_SIZE[s.bucket] * (0.6 + s.depth * 0.8);
+      const x = s.x + px * s.depth;
+      const y = s.y + py * s.depth;
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(getSprite(s.tint, s.bucket), x - size / 2, y - size / 2, size, size);
+      if (s.hasFlare) {
+        const fs = size * 6;
+        ctx.globalAlpha = alpha * 0.3;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(s.angle);
+        ctx.drawImage(getFlare(), -fs / 2, -fs / 2, fs, fs);
+        ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1;
+    if (!reduceMotion) {
+      if (!shooting) {
+        nextShot -= dt * 1000;
+        if (nextShot <= 0) { spawnShooting(); nextShot = 7000 + Math.random() * 12000; }
+      } else {
+        const p = shooting;
+        p.x += p.vx * dt; p.y += p.vy * dt; p.life += dt;
+        const tailX = p.x - p.vx * 0.13;
+        const tailY = p.y - p.vy * 0.13;
+        const fade = Math.max(0, 1 - p.life / p.max);
+        const grad = ctx.createLinearGradient(p.x, p.y, tailX, tailY);
+        grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+        grad.addColorStop(0.35, 'rgba(190,220,255,0.32)');
+        grad.addColorStop(1, 'rgba(190,220,255,0)');
+        ctx.globalAlpha = fade;
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+        ctx.globalAlpha = fade * 0.85;
+        ctx.drawImage(getSprite(0, 3), p.x - 8, p.y - 8, 16, 16);
+        ctx.globalAlpha = 1;
+        if (p.life > p.max || p.x < -300 || p.x > W + 300 || p.y > H + 300) shooting = null;
+      }
+    }
+  }
+
+  function loop(now) { draw(now); rafId = requestAnimationFrame(loop); }
+  function start() {
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    lastT = performance.now();
+    if (reduceMotion) { draw(performance.now()); rafId = null; return; }
+    rafId = requestAnimationFrame(loop);
+  }
+  function stop() { if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } }
+
+  let resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { build(); if (reduceMotion) draw(performance.now()); }, 140);
+  });
+  window.addEventListener('pointermove', function (e) {
+    targetX = (e.clientX / W) * 2 - 1;
+    targetY = (e.clientY / H) * 2 - 1;
+  }, { passive: true });
+  document.addEventListener('visibilitychange', function () {
+    if (reduceMotion) return;
+    if (document.hidden) stop(); else start();
+  });
+  build(); start();
+})();
+</script>
+
+<!-- =========================================================
+     MAIN APP
+     ========================================================= -->
+<script type="module">
+import Numworks from 'https://esm.sh/upsilon.js@1.4.2';
+
+const DB_NAME = 'DUB5VersionManager';
+const DB_VERSION = 2;
+const GITHUB_OWNER = 'RgadeX';
+const GITHUB_REPO = 'ah';
+const GITHUB_BRANCH = 'main';
+
+const ICONS = {
+  plug: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 9H19M15 18V15M9 18H9.01M12 18H12.01M12 15H12.01M9 15H9.01M15 12H15.01M12 12H12.01M9 12H9.01M8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V6.2C19 5.0799 19 4.51984 18.782 4.09202C18.5903 3.71569 18.2843 3.40973 17.908 3.21799C17.4802 3 16.9201 3 15.8 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.07989 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.07989 21 8.2 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  upload: '<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" stroke="none"><path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4z"/><path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-4z"/></svg>',
+  zip: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a1 1 0 0 1 1 1v10.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L11 13.586V3a1 1 0 0 1 1-1zM5 17a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a1 1 0 0 1 1-1z"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>',
+  import: '<svg viewBox="0 0 24 24"><path d="M12 16V4"></path><path d="M8 8l4-4 4 4"></path><path d="M5 20h14"></path></svg>',
+  save: '<svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"></path><path d="M8 4v6h7V4"></path><path d="M8 20v-6h8v6"></path></svg>',
+  cloud: '<svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.7-1.3A4 4 0 0 0 7 18z"></path><path d="M12 12v6"></path><path d="M9.5 14.5L12 12l2.5 2.5"></path></svg>',
+  search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-3.5-3.5"></path></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.793 2.293a1 1 0 0 1 1.414 0l3 3a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414L14.086 7H12.5C8.952 7 6 9.952 6 13.5S8.952 20 12.5 20s6.5-2.952 6.5-6.5a1 1 0 1 1 2 0c0 4.652-3.848 8.5-8.5 8.5S4 18.152 4 13.5 7.848 5 12.5 5h1.586l-1.293-1.293a1 1 0 0 1 0-1.414z"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>',
+  folder: '<svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v8a2 2 0 0 1-2 2H3z"></path></svg>',
+  file: '<svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"></path><path d="M14 3v5h5"></path></svg>',
+  close: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>',
+  warning: '<svg viewBox="0 0 24 24"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 4.9l-7.4 12.8A2 2 0 0 0 4.6 21h14.8a2 2 0 0 0 1.7-3.3L13.7 4.9a2 2 0 0 0-3.4 0z"></path></svg>',
+  spark: '<svg viewBox="0 0 24 24"><path d="M12 2l1.5 6.5L20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5z"></path></svg>',
+  settings: '<svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+  eye: '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+};
+
+function icon(n) { return ICONS[n] || ''; }
+function setIconButton(el, n) { if (el) el.innerHTML = icon(n); }
+
+function generateUUID() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+async function sha256(msg) {
+  const buf = new TextEncoder().encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(function(b) {
+    return b.toString(16).padStart(2, '0');
+  }).join('');
+}
+
+function amsParts(date) {
+  date = date || new Date();
+  const dtf = new Intl.DateTimeFormat('nl-NL', {
+    timeZone: 'Europe/Amsterdam',
+    day: 'numeric', month: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+  const p = dtf.formatToParts(date);
+  function g(t) { const f = p.find(function(x){ return x.type === t; }); return f ? f.value : '0'; }
+  return { day: g('day'), month: g('month'), year: g('year'), hour: g('hour'), minute: g('minute') };
+}
+
+function amsFilename(date) {
+  const p = amsParts(date);
+  return p.day + '-' + p.month + '-' + p.year + '-' + p.hour + ':' + p.minute;
+}
+
+function amsDisplay(date) {
+  const p = amsParts(date);
+  return p.day + '-' + p.month + '-' + p.year + ' ' + p.hour + ':' + p.minute;
+}
+
+function defaultName() { return amsFilename() + '.py'; }
+
+function ensurePy(n) {
+  n = (n || '').trim();
+  if (!n) return defaultName();
+  if (!/\.py$/i.test(n)) n += '.py';
+  return n;
+}
+
+function vLabel(v) { return 'v1.' + Math.max(0, v - 1); }
+
+function tabTitle(name, v) { return v ? name + ' · ' + vLabel(v) : name; }
+
+function notify(msg, type) {
+  type = type || 'info';
+  const area = document.getElementById('notification-area');
+  const d = document.createElement('div');
+  d.className = 'notification ' + type;
+  const ic = type === 'success' ? 'check' : type === 'error' || type === 'warning' ? 'warning' : 'spark';
+  d.innerHTML = icon(ic) + '<span>' + msg + '</span>';
+  area.appendChild(d);
+  setTimeout(function() { d.style.opacity = '0'; setTimeout(function() { d.remove(); }, 250); }, 3500);
+}
+
+function statusPill(msg, type) {
+  type = type || 'info';
+  const p = document.getElementById('market-status');
+  p.className = 'status-pill ' + type;
+  const ic = type === 'success' ? 'check' : type === 'error' ? 'warning' : 'spark';
+  p.innerHTML = icon(ic) + '<span>' + msg + '</span>';
+  p.classList.remove('hidden');
+  clearTimeout(statusPill._t);
+  statusPill._t = setTimeout(function() { p.classList.add('hidden'); }, 4000);
+}
+
+/* =========================================================
+   IndexedDB
+   ========================================================= */
+function openDB() {
+  return new Promise(function(resolve, reject) {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = function() { reject(req.error); };
+    req.onsuccess = function() { resolve(req.result); };
+    req.onupgradeneeded = function(e) {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('scripts')) db.createObjectStore('scripts', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('versions')) {
+        const s = db.createObjectStore('versions', { keyPath: 'id' });
+        s.createIndex('scriptId', 'scriptId', { unique: false });
+      }
+      if (!db.objectStoreNames.contains('restorePoints')) {
+        const s = db.createObjectStore('restorePoints', { keyPath: 'id' });
+        s.createIndex('scriptId', 'scriptId', { unique: false });
+      }
+    };
+  });
+}
+
+function dbAll(store) {
+  return openDB().then(function(db) {
+    return new Promise(function(res, rej) {
+      const tx = db.transaction(store, 'readonly');
+      const r = tx.objectStore(store).getAll();
+      r.onsuccess = function() { res(r.result || []); };
+      r.onerror = function() { rej(r.error); };
+    });
+  });
+}
+
+function dbPut(store, data) {
+  return openDB().then(function(db) {
+    return new Promise(function(res, rej) {
+      const tx = db.transaction(store, 'readwrite');
+      const r = tx.objectStore(store).put(data);
+      r.onsuccess = function() { res(); };
+      r.onerror = function() { rej(r.error); };
+    });
+  });
+}
+
+function dbGet(store, id) {
+  return openDB().then(function(db) {
+    return new Promise(function(res, rej) {
+      const tx = db.transaction(store, 'readonly');
+      const r = tx.objectStore(store).get(id);
+      r.onsuccess = function() { res(r.result); };
+      r.onerror = function() { rej(r.error); };
+    });
+  });
+}
+
+function dbDel(store, id) {
+  return openDB().then(function(db) {
+    return new Promise(function(res, rej) {
+      const tx = db.transaction(store, 'readwrite');
+      const r = tx.objectStore(store).delete(id);
+      r.onsuccess = function() { res(); };
+      r.onerror = function() { rej(r.error); };
+    });
+  });
+}
+
+/* =========================================================
+   Calculator Manager
+   ========================================================= */
+class CalculatorManager {
+  constructor() {
+    this.device = null;
+    this.isConnected = false;
+    this.platformInfo = null;
+  }
+
+  getDeviceLabel() {
+    if (!this.platformInfo) return 'NumWorks';
+    return this.platformInfo.model || this.platformInfo.name || this.platformInfo.device || 'NumWorks';
+  }
+
+  connect() {
+    const self = this;
+    this.device = new Numworks();
+    return new Promise(function(resolve, reject) {
+      self.device.detect(function() {
+        self.device.getPlatformInfo().then(function(info) {
+          self.platformInfo = info;
+          self.isConnected = true;
+          resolve(info);
+          notify('Connected to ' + self.getDeviceLabel(), 'success');
+        }).catch(reject);
+      }, function(err) {
+        self.isConnected = false;
+        notify('Connection failed: ' + (err.message || err), 'error');
+        reject(err);
+      });
+    });
+  }
+
+  autoConnect() {
+    const self = this;
+    if (!this.device) this.device = new Numworks();
+    return new Promise(function(resolve) {
+      let done = false;
+      function settle(v) { if (done) return; done = true; resolve(v); }
+      self.device.autoConnect(function() {
+        self.device.stopAutoConnect();
+        self.device.getPlatformInfo().then(function(info) {
+          self.platformInfo = info;
+          self.isConnected = true;
+          settle(info);
+        }).catch(function() { settle(null); });
+      });
+      setTimeout(function() {
+        try { self.device.stopAutoConnect(); } catch(e) {}
+        self.isConnected = false;
+        settle(null);
+      }, 3000);
+    });
+  }
+
+  getScripts() {
+    if (!this.isConnected) return Promise.reject(new Error('Not connected'));
+    return this.device.backupStorage().then(function(s) {
+      return (s.records || []).filter(function(r) { return r.type === 'py'; }).map(function(r) {
+        return { name: r.name, code: r.code, autoImport: r.autoImport };
+      });
+    });
+  }
+
+  uploadScript(name, code) {
+    const self = this;
+    if (!this.isConnected) return Promise.reject(new Error('Not connected'));
+    return this.device.backupStorage().then(function(storage) {
+      const records = Array.isArray(storage.records) ? storage.records : [];
+      const i = records.findIndex(function(r) { return r.name === name && r.type === 'py'; });
+      const rec = { name: name, type: 'py', autoImport: false, code: code };
+      if (i >= 0) records[i] = rec; else records.push(rec);
+      storage.records = records;
+      return new Promise(function(res, rej) {
+        try { self.device.installStorage(storage, function() { res(); }); } catch(e) { rej(e); }
+      });
+    }).then(function() {
+      return self.device.backupStorage();
+    }).then(function(verify) {
+      const v = (verify.records || []).find(function(r) { return r.name === name && r.type === 'py'; });
+      if (!v || v.code !== code) throw new Error('Verification failed');
+      return true;
+    });
+  }
+}
+
+/* =========================================================
+   App
+   ========================================================= */
+const app = {
+  state: {
+    scripts: [], versions: [], restorePoints: [],
+    openTabs: [], activeTabId: null, currentScriptId: null,
+    unsavedChanges: false,
+    calc: new CalculatorManager(),
+    editor: null, suppressEditorChange: false,
+    marketCache: [], marketQuery: '', marketplaceInitialized: false,
+    contextMenuTarget: null,
+    panes: { explorer: true, editor: true, marketplace: true }
+  },
+
+  init: function() {
+    const self = this;
+
+    setIconButton(document.getElementById('btn-connect'), 'plug');
+    setIconButton(document.getElementById('btn-upload'), 'upload');
+    setIconButton(document.getElementById('btn-export'), 'zip');
+    setIconButton(document.getElementById('btn-new-script'), 'plus');
+    setIconButton(document.getElementById('btn-import-py'), 'import');
+    setIconButton(document.getElementById('btn-save-version'), 'save');
+    setIconButton(document.getElementById('btn-publish'), 'cloud');
+    setIconButton(document.getElementById('btn-market-search'), 'search');
+    setIconButton(document.getElementById('btn-market-refresh'), 'refresh');
+    setIconButton(document.getElementById('btn-settings'), 'settings');
+
+    // Setup resizable panes before loading data
+    this.setupResizers();
+
+    Promise.all([dbAll('scripts'), dbAll('versions'), dbAll('restorePoints')])
+      .then(function(res) {
+        self.state.scripts = res[0];
+        self.state.versions = res[1];
+        self.state.restorePoints = res[2];
+        self.initEditor();
+        self.setupEvents();
+        self.renderExplorer();
+        self.renderTabs();
+        self.updateEditorMeta();
+        self.refreshMarket(true).catch(function() {});
+        self.state.calc.autoConnect().then(function(info) {
+          self.updateCalcStatus(!!info, info);
+        });
+        self.updateUI();
+      })
+      .catch(function(err) {
+        console.error('Init failed:', err);
+        notify('Failed to load local data', 'error');
+      });
+  },
+
+  updateGridLayout: function() {
+    const mainContent = document.querySelector('.main-content');
+    const hasExplorer = this.state.panes.explorer;
+    const hasEditor = this.state.panes.editor;
+    const hasMarketplace = this.state.panes.marketplace;
+    
+    let gridTemplate = '';
+    
+    if (hasExplorer && hasEditor && hasMarketplace) {
+      gridTemplate = 'var(--left-width, 350px) minmax(0, 1fr) var(--right-width, 310px)';
+    } else if (hasExplorer && hasEditor) {
+      gridTemplate = 'var(--left-width, 350px) minmax(0, 1fr)';
+    } else if (hasExplorer && hasMarketplace) {
+      gridTemplate = 'var(--left-width, 350px) var(--right-width, 310px)';
+    } else if (hasEditor && hasMarketplace) {
+      gridTemplate = 'minmax(0, 1fr) var(--right-width, 310px)';
+    } else if (hasExplorer) {
+      gridTemplate = '1fr';
+    } else if (hasEditor) {
+      gridTemplate = '1fr';
+    } else if (hasMarketplace) {
+      gridTemplate = '1fr';
+    } else {
+      gridTemplate = '1fr';
+    }
+    
+    mainContent.style.gridTemplateColumns = gridTemplate;
+    
+    // Adjust border radius based on visibility
+    const sidebarLeft = document.querySelector('.sidebar-left');
+    const sidebarRight = document.querySelector('.sidebar-right');
+    const editorArea = document.querySelector('.editor-area');
+    
+    if (hasExplorer && !hasEditor && !hasMarketplace) {
+      sidebarLeft.style.borderRadius = 'var(--r-panel)';
+    } else if (hasExplorer) {
+      sidebarLeft.style.borderRadius = 'var(--r-panel) 0 0 var(--r-panel)';
+    }
+    
+    if (hasMarketplace && !hasExplorer && !hasEditor) {
+      sidebarRight.style.borderRadius = 'var(--r-panel)';
+    } else if (hasMarketplace) {
+      sidebarRight.style.borderRadius = '0 var(--r-panel) var(--r-panel) 0';
+    }
+    
+    if (hasEditor && !hasExplorer && !hasMarketplace) {
+      editorArea.style.borderRadius = 'var(--r-panel)';
+    } else {
+      editorArea.style.borderRadius = '0';
+    }
+    
+    // Refresh CodeMirror if it exists
+    if (this.state.editor) {
+      this.state.editor.refresh();
+    }
+  },
+
+  setupResizers: function() {
+    const self = this;
+    const resizerLeft = document.getElementById('resizer-left');
+    const resizerRight = document.getElementById('resizer-right');
+    const mainContent = document.querySelector('.main-content');
+    
+    // Load saved widths from localStorage
+    const savedLeftWidth = localStorage.getItem('dub5_left_width');
+    const savedRightWidth = localStorage.getItem('dub5_right_width');
+    if (savedLeftWidth) {
+      document.documentElement.style.setProperty('--left-width', savedLeftWidth + 'px');
+    } else {
+      // Set default wider Explorer width
+      document.documentElement.style.setProperty('--left-width', '350px');
+    }
+    if (savedRightWidth) {
+      document.documentElement.style.setProperty('--right-width', savedRightWidth + 'px');
+    }
+    
+    // Load saved pane visibility
+    const savedPanes = localStorage.getItem('dub5_panes');
+    if (savedPanes) {
+      try {
+        const parsed = JSON.parse(savedPanes);
+        this.state.panes = parsed;
+        // Update button states
+        document.getElementById('toggle-explorer').classList.toggle('active', this.state.panes.explorer);
+        document.getElementById('toggle-editor').classList.toggle('active', this.state.panes.editor);
+        document.getElementById('toggle-marketplace').classList.toggle('active', this.state.panes.marketplace);
+        // Update visibility
+        document.querySelector('.sidebar-left').classList.toggle('hidden', !this.state.panes.explorer);
+        document.getElementById('resizer-left').classList.toggle('hidden', !this.state.panes.explorer);
+        document.querySelector('.editor-area').classList.toggle('hidden', !this.state.panes.editor);
+        document.querySelector('.sidebar-right').classList.toggle('hidden', !this.state.panes.marketplace);
+        document.getElementById('resizer-right').classList.toggle('hidden', !this.state.panes.marketplace);
+        this.updateGridLayout();
+      } catch(e) {
+        console.error('Failed to load pane state:', e);
+      }
+    }
+
+    // Left resizer (border of Explorer)
+    resizerLeft.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const startX = e.clientX;
+      const leftSidebar = document.querySelector('.sidebar-left');
+      const startWidth = leftSidebar.offsetWidth;
+      const mainRect = mainContent.getBoundingClientRect();
+      
+      resizerLeft.classList.add('resizing');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      
+      function onMouseMove(e) {
+        const deltaX = e.clientX - startX;
+        const newWidth = Math.max(300, Math.min(mainRect.width - 600, startWidth + deltaX));
+        document.documentElement.style.setProperty('--left-width', newWidth + 'px');
+        
+        // Adjust editor width responsively
+        const rightWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--right-width')) || 310;
+        const availableWidth = mainRect.width - newWidth - rightWidth;
+        if (availableWidth > 200) {
+          // Editor takes remaining space automatically via minmax(0, 1fr)
+        }
+      }
+      
+      function onMouseUp() {
+        resizerLeft.classList.remove('resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // Save to localStorage
+        const currentWidth = document.querySelector('.sidebar-left').offsetWidth;
+        localStorage.setItem('dub5_left_width', currentWidth);
+        
+        // Refresh CodeMirror if it exists
+        if (self.state.editor) {
+          self.state.editor.refresh();
+        }
+      }
+      
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+
+    // Right resizer (border of Marketplace)
+    resizerRight.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const startX = e.clientX;
+      const rightSidebar = document.querySelector('.sidebar-right');
+      const startWidth = rightSidebar.offsetWidth;
+      const mainRect = mainContent.getBoundingClientRect();
+      
+      resizerRight.classList.add('resizing');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      
+      function onMouseMove(e) {
+        const deltaX = startX - e.clientX;
+        const newWidth = Math.max(300, Math.min(mainRect.width - 600, startWidth + deltaX));
+        document.documentElement.style.setProperty('--right-width', newWidth + 'px');
+        
+        // Adjust editor width responsively
+        const leftWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--left-width')) || 350;
+        const availableWidth = mainRect.width - leftWidth - newWidth;
+        if (availableWidth > 200) {
+          // Editor takes remaining space automatically via minmax(0, 1fr)
+        }
+      }
+      
+      function onMouseUp() {
+        resizerRight.classList.remove('resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // Save to localStorage
+        const currentWidth = document.querySelector('.sidebar-right').offsetWidth;
+        localStorage.setItem('dub5_right_width', currentWidth);
+        
+        // Refresh CodeMirror if it exists
+        if (self.state.editor) {
+          self.state.editor.refresh();
+        }
+      }
+      
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  },
+
+  initEditor: function() {
+    const self = this;
+    this.state.editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+      mode: 'python', theme: 'dracula', lineNumbers: true,
+      tabSize: 4, indentWithTabs: false, lineWrapping: true,
+      viewportMargin: Infinity,
+      extraKeys: {
+        'Ctrl-S': function() { self.saveVersion(); },
+        'Cmd-S': function() { self.saveVersion(); }
+      }
+    });
+    const w = this.state.editor.getWrapperElement();
+    w.style.display = 'flex';
+    w.style.flex = '1';
+    w.style.pointerEvents = 'auto';
+    w.addEventListener('click', function() { self.state.editor.focus(); });
+
+    let autosaveT;
+    this.state.editor.on('change', function() {
+      if (self.state.suppressEditorChange) return;
+      const tab = self.getActiveTab();
+      if (!tab || tab.readOnly) return;
+      tab.content = self.state.editor.getValue();
+      tab.dirty = true;
+      self.state.unsavedChanges = true;
+      self.updateUI();
+      self.renderTabs();
+      if (localStorage.getItem('dub5_autosave') === 'true') {
+        clearTimeout(autosaveT);
+        autosaveT = setTimeout(function() {
+          self.saveVersion({ silent: true, force: false });
+        }, 2000);
+      }
+    });
+  },
+
+  setupEvents: function() {
+    const self = this;
+
+    // Setup pane toggle buttons
+    document.getElementById('toggle-explorer').addEventListener('click', function() {
+      self.state.panes.explorer = !self.state.panes.explorer;
+      this.classList.toggle('active', self.state.panes.explorer);
+      document.querySelector('.sidebar-left').classList.toggle('hidden', !self.state.panes.explorer);
+      document.getElementById('resizer-left').classList.toggle('hidden', !self.state.panes.explorer);
+      localStorage.setItem('dub5_panes', JSON.stringify(self.state.panes));
+      self.updateGridLayout();
+    });
+
+    document.getElementById('toggle-editor').addEventListener('click', function() {
+      self.state.panes.editor = !self.state.panes.editor;
+      this.classList.toggle('active', self.state.panes.editor);
+      document.querySelector('.editor-area').classList.toggle('hidden', !self.state.panes.editor);
+      localStorage.setItem('dub5_panes', JSON.stringify(self.state.panes));
+      self.updateGridLayout();
+    });
+
+    document.getElementById('toggle-marketplace').addEventListener('click', function() {
+      self.state.panes.marketplace = !self.state.panes.marketplace;
+      this.classList.toggle('active', self.state.panes.marketplace);
+      document.querySelector('.sidebar-right').classList.toggle('hidden', !self.state.panes.marketplace);
+      document.getElementById('resizer-right').classList.toggle('hidden', !self.state.panes.marketplace);
+      localStorage.setItem('dub5_panes', JSON.stringify(self.state.panes));
+      self.updateGridLayout();
+    });
+
+    document.getElementById('btn-enter').addEventListener('click', function() {
+      document.getElementById('landing-screen').classList.add('hidden');
+      document.getElementById('app-shell').classList.remove('hidden');
+      setTimeout(function() {
+        if (self.state.editor) {
+          self.state.editor.refresh();
+          self.state.editor.focus();
+        }
+      }, 60);
+    });
+
+    document.getElementById('btn-connect').addEventListener('click', function() {
+      self.state.calc.connect().then(function(info) {
+        self.updateCalcStatus(true, info);
+        return self.syncFromCalc();
+      }).catch(function() {
+        self.updateCalcStatus(false, null);
+      });
+    });
+
+    document.getElementById('btn-new-script').addEventListener('click', function() {
+      self.showModal('New script', [
+        { id: 'name', label: 'Filename', type: 'text', placeholder: 'Leave blank for timestamp name' }
+      ], function(data) {
+        const name = ensurePy(data['name'] || '');
+        if (self.state.scripts.some(function(s) { return s.name.toLowerCase() === name.toLowerCase(); })) {
+          notify('That file already exists', 'error');
+          return;
+        }
+        const script = {
+          id: generateUUID(), name: name, activeVersionId: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          published: false, publishedAt: null
+        };
+        return dbPut('scripts', script).then(function() {
+          self.state.scripts.push(script);
+          self.renderExplorer();
+          self.openTab(script.id);
+          notify('Script created', 'success');
+        });
+      });
+    });
+
+    document.getElementById('btn-import-py').addEventListener('click', function() {
+      document.getElementById('file-import').click();
+    });
+
+    document.getElementById('file-import').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function() {
+        let name = ensurePy(file.name);
+        if (self.state.scripts.some(function(s) { return s.name.toLowerCase() === name.toLowerCase(); })) {
+          name = ensurePy(file.name.replace(/\.py$/i, '') + '_' + amsFilename());
+        }
+        const script = {
+          id: generateUUID(), name: name, activeVersionId: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          published: false, publishedAt: null
+        };
+        dbPut('scripts', script).then(function() {
+          self.state.scripts.push(script);
+          self.renderExplorer();
+          const tabId = self.openTab(script.id, { content: reader.result });
+          self.setActiveTab(tabId, { force: true });
+          notify('Imported Python file', 'success');
+        });
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    document.getElementById('script-name-input').addEventListener('change', function(e) {
+      const tab = self.getActiveTab();
+      if (!tab) return;
+      
+      // Only allow editing for local scripts (with scriptId)
+      if (!tab.scriptId) return;
+      
+      // For local scripts, update the script name in IndexedDB
+      if (!self.state.currentScriptId) return;
+      const newName = ensurePy(e.target.value.trim());
+      const script = self.state.scripts.find(function(s) { return s.id === self.state.currentScriptId; });
+      if (!script) return;
+      if (script.name.toLowerCase() === newName.toLowerCase()) {
+        e.target.value = script.name;
+        return;
+      }
+      if (self.state.scripts.some(function(s) { return s.id !== script.id && s.name.toLowerCase() === newName.toLowerCase(); })) {
+        notify('Another file already uses that name', 'error');
+        e.target.value = script.name;
+        return;
+      }
+      script.name = newName;
+      script.updatedAt = new Date().toISOString();
+      dbPut('scripts', script).then(function() {
+        self.updateTabLabels(script.id);
+        self.renderExplorer();
+        e.target.value = script.name;
+        notify('Filename updated', 'success');
+      });
+    });
+
+    document.getElementById('btn-save-version').addEventListener('click', function() { self.saveVersion(); });
+    document.getElementById('btn-publish').addEventListener('click', function() { self.publish(); });
+    document.getElementById('btn-upload').addEventListener('click', function() { self.loadToCalc(); });
+    document.getElementById('btn-export').addEventListener('click', function() { self.exportAll(); });
+    document.getElementById('btn-market-search').addEventListener('click', function() { self.refreshMarket(); });
+    document.getElementById('btn-market-refresh').addEventListener('click', function() { self.refreshMarket(true); });
+
+    document.getElementById('market-search-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') self.refreshMarket();
+    });
+    document.getElementById('market-search-input').addEventListener('input', function(e) {
+      self.state.marketQuery = e.target.value;
+      self.renderMarket();
+    });
+
+    document.getElementById('btn-settings').addEventListener('click', function() {
+      const isAutosave = localStorage.getItem('dub5_autosave') === 'true';
+      self.showModal('Settings', [
+        { id: 'autosave', label: 'Enable Autosave (saves version after 2s of inactivity)', type: 'checkbox', checked: isAutosave }
+      ], function(data) {
+        localStorage.setItem('dub5_autosave', data['autosave'] === 'on' ? 'true' : 'false');
+        notify('Settings saved', 'success');
+      });
+    });
+
+    document.addEventListener('contextmenu', function(e) {
+      const scriptRow = e.target.closest('.tree-script-row');
+      const versionRow = e.target.closest('.tree-version-row');
+      if (scriptRow) {
+        e.preventDefault();
+        const sid = scriptRow.closest('.tree-node').dataset.scriptId;
+        self.showCtx(e.clientX, e.clientY, 'script', sid);
+      } else if (versionRow) {
+        e.preventDefault();
+        const sid = versionRow.closest('.tree-node').dataset.scriptId;
+        self.showCtx(e.clientX, e.clientY, 'version', versionRow.dataset.versionId, sid);
+      } else {
+        self.hideCtx();
+      }
+    });
+
+    document.addEventListener('click', function() { self.hideCtx(); });
+
+    document.getElementById('context-menu').addEventListener('click', function(e) {
+      const item = e.target.closest('.context-menu-item');
+      if (!item || !self.state.contextMenuTarget) return;
+      const action = item.dataset.action;
+      const sid = self.state.contextMenuTarget.scriptId;
+      self.hideCtx();
+
+      if (action === 'rename') {
+        const script = self.getScript(sid);
+        if (!script) {
+          notify('Script not found', 'error');
+          return;
+        }
+        const nn = prompt('Enter new filename (with .py):', script.name);
+        if (!nn) return;
+        const ensured = ensurePy(nn);
+        if (self.state.scripts.some(function(s) { return s.id !== sid && s.name.toLowerCase() === ensured.toLowerCase(); })) {
+          notify('A script with this name already exists', 'error');
+          return;
+        }
+        script.name = ensured;
+        script.updatedAt = new Date().toISOString();
+        dbPut('scripts', script).then(function() {
+          self.updateTabLabels(sid);
+          self.renderExplorer();
+          notify('Script renamed', 'success');
+        }).catch(function(err) {
+          console.error('Rename failed:', err);
+          notify('Rename failed: ' + err.message, 'error');
+        });
+      } else if (action === 'duplicate') {
+        const script = self.getScript(sid);
+        if (!script) {
+          notify('Script not found', 'error');
+          return;
+        }
+        const base = script.name.replace(/\.py$/i, '');
+        let i = 1, nn = base + ' (' + i + ').py';
+        while (self.state.scripts.some(function(s) { return s.name.toLowerCase() === nn.toLowerCase(); })) {
+          i++; nn = base + ' (' + i + ').py';
+        }
+        const newScript = {
+          id: generateUUID(), name: nn, activeVersionId: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          published: false, publishedAt: null
+        };
+        dbPut('scripts', newScript).then(function() {
+          self.state.scripts.push(newScript);
+          const latest = self.getLatest(sid);
+          if (!latest) {
+            self.renderExplorer();
+            self.openTab(newScript.id);
+            notify('Duplicated as ' + nn, 'success');
+            return;
+          }
+          return sha256(latest.sourceCode).then(function(hash) {
+            const v = {
+              id: generateUUID(), scriptId: newScript.id, parentVersionId: null,
+              branchId: 'main', versionNumber: 1,
+              displayName: nn + ' (v1.0)', commitMessage: 'Duplicated',
+              sourceCode: latest.sourceCode,
+              createdAt: new Date().toISOString(),
+              characterCount: latest.sourceCode.length,
+              lineCount: latest.sourceCode.split('\n').length,
+              sourceHash: hash, uploadedToCalculator: false, uploadedAt: null,
+              published: false, publishedAt: null, publishedPath: null
+            };
+            return dbPut('versions', v).then(function() {
+              self.state.versions.push(v);
+              newScript.activeVersionId = v.id;
+              return dbPut('scripts', newScript);
+            }).then(function() {
+              self.renderExplorer();
+              self.openTab(newScript.id);
+              notify('Duplicated as ' + nn, 'success');
+            });
+          });
+        }).catch(function(err) {
+          console.error('Duplicate failed:', err);
+          notify('Duplicate failed: ' + err.message, 'error');
+        });
+      } else if (action === 'delete') {
+        const script = self.getScript(sid);
+        if (!script) {
+          notify('Script not found', 'error');
+          return;
+        }
+        if (!confirm('Delete "' + script.name + '" and all its versions?')) return;
+        const versions = self.getVersions(sid);
+        const dels = versions.map(function(v) {
+          return dbDel('versions', v.id).then(function() {
+            const rps = self.state.restorePoints.filter(function(rp) { return rp.versionId === v.id; });
+            return Promise.all(rps.map(function(rp) { return dbDel('restorePoints', rp.id); }));
+          });
+        });
+        Promise.all(dels).then(function() {
+          return dbDel('scripts', sid);
+        }).then(function() {
+          self.state.scripts = self.state.scripts.filter(function(s) { return s.id !== sid; });
+          self.state.versions = self.state.versions.filter(function(v) { return v.scriptId !== sid; });
+          self.state.restorePoints = self.state.restorePoints.filter(function(rp) { return rp.scriptId !== sid; });
+          const open = self.state.openTabs.find(function(t) { return t.scriptId === sid; });
+          if (open) self.closeTab(open.id);
+          self.renderExplorer();
+          notify('Script deleted', 'success');
+        }).catch(function(err) {
+          console.error('Delete failed:', err);
+          notify('Delete failed: ' + err.message, 'error');
+        });
+      }
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+      if (self.state.unsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  },
+
+  showCtx: function(x, y, type, id, sid) {
+    this.state.contextMenuTarget = { type: type, id: id, scriptId: sid };
+    const m = document.getElementById('context-menu');
+    m.style.left = x + 'px';
+    m.style.top = y + 'px';
+    m.classList.remove('hidden');
+  },
+
+  hideCtx: function() {
+    this.state.contextMenuTarget = null;
+    document.getElementById('context-menu').classList.add('hidden');
+  },
+
+  getActiveTab: function() {
+    const id = this.state.activeTabId;
+    return this.state.openTabs.find(function(t) { return t.id === id; }) || null;
+  },
+
+  getScript: function(sid) {
+    return this.state.scripts.find(function(s) { return s.id === sid; }) || null;
+  },
+
+  getVersions: function(sid) {
+    return this.state.versions.filter(function(v) { return v.scriptId === sid; })
+      .sort(function(a, b) { return a.versionNumber - b.versionNumber; });
+  },
+
+  getVersion: function(sid, vid) {
+    return this.state.versions.find(function(v) { return v.id === vid && v.scriptId === sid; }) || null;
+  },
+
+  getLatest: function(sid) {
+    const vs = this.getVersions(sid);
+    return vs.length ? vs[vs.length - 1] : null;
+  },
+
+  openTab: function(sid, opts) {
+    opts = opts || {};
+    const script = this.getScript(sid);
+    if (!script) return null;
+    const version = opts.versionId
+      ? this.getVersion(sid, opts.versionId)
+      : this.getVersion(sid, script.activeVersionId) || this.getLatest(sid);
+    const key = sid + ':' + (version ? version.id : 'draft') + ':' + (opts.remote ? 'r' : 'l');
+    const existing = this.state.openTabs.find(function(t) { return t.key === key; });
+    if (existing) { this.setActiveTab(existing.id); return existing.id; }
+    const tab = {
+      id: generateUUID(), key: key, scriptId: sid,
+      versionId: version ? version.id : null,
+      title: tabTitle(script.name, version ? version.versionNumber : null),
+      content: typeof opts.content === 'string' ? opts.content : (version ? version.sourceCode : ''),
+      dirty: false, remote: !!opts.remote, readOnly: !!opts.remote
+    };
+    this.state.openTabs.push(tab);
+    this.setActiveTab(tab.id, { force: true });
+    return tab.id;
+  },
+
+  openRemote: function(name, content) {
+    const key = 'mkt:' + name;
+    const existing = this.state.openTabs.find(function(t) { return t.key === key; });
+    if (existing) { this.setActiveTab(existing.id); return existing.id; }
+    const tab = {
+      id: generateUUID(), key: key, scriptId: null, versionId: null,
+      title: name, content: content || '', dirty: false,
+      remote: true, readOnly: true
+    };
+    this.state.openTabs.push(tab);
+    this.setActiveTab(tab.id, { force: true });
+    return tab.id;
+  },
+
+  setActiveTab: function(tabId, opts) {
+    opts = opts || {};
+    const self = this;
+    const tab = this.state.openTabs.find(function(t) { return t.id === tabId; });
+    if (!tab) return;
+    const current = this.getActiveTab();
+    if (current && current.id !== tab.id && !opts.force && !current.readOnly) {
+      current.content = this.state.editor.getValue();
+      current.dirty = current.content !== this.getSavedContent(current);
+    }
+    this.state.activeTabId = tabId;
+    this.state.currentScriptId = tab.scriptId;
+    this.refreshEditor();
+    this.renderTabs();
+    this.renderExplorer();
+    this.updateEditorMeta();
+    this.updateUI();
+  },
+
+  getSavedContent: function(tab) {
+    if (!tab) return '';
+    if (tab.remote) return tab.content || '';
+    const script = this.getScript(tab.scriptId);
+    if (!script) return tab.content || '';
+    const v = tab.versionId ? this.getVersion(tab.scriptId, tab.versionId) : null;
+    return v ? v.sourceCode : (tab.content || '');
+  },
+
+  refreshEditor: function() {
+    const self = this;
+    const tab = this.getActiveTab();
+    const nameInput = document.getElementById('script-name-input');
+    const roHint = document.getElementById('readonly-hint');
+    const emptyState = document.getElementById('editor-empty-state');
+    
+    if (!tab) {
+      this.state.editor.setValue('');
+      nameInput.value = '';
+      nameInput.disabled = true;
+      nameInput.classList.add('hidden');
+      roHint.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      if (this.state.editor) {
+        this.state.editor.getWrapperElement().classList.add('hidden');
+      }
+      this.state.unsavedChanges = false;
+      this.updateUI();
+      return;
+    }
+    
+    // Show editor, hide empty state
+    emptyState.classList.add('hidden');
+    if (this.state.editor) {
+      this.state.editor.getWrapperElement().classList.remove('hidden');
+    }
+    
+    const content = tab.remote ? tab.content : (tab.content || '');
+    this.state.suppressEditorChange = true;
+    this.state.editor.setValue(content);
+    this.state.suppressEditorChange = false;
+    
+    // Only show input field for local scripts (with scriptId)
+    if (tab.scriptId) {
+      nameInput.value = ((this.getScript(tab.scriptId) || {}).name || '') || tab.title;
+      nameInput.disabled = !!tab.readOnly;
+      nameInput.classList.remove('hidden');
+    } else {
+      nameInput.value = tab.title;
+      nameInput.disabled = true;
+      nameInput.classList.add('hidden');
+    }
+    roHint.classList.toggle('hidden', !tab.readOnly);
+    this.state.unsavedChanges = !!tab.dirty && !tab.readOnly;
+    this.state.editor.setOption('readOnly', tab.readOnly ? 'nocursor' : false);
+    this.state.editor.refresh();
+    setTimeout(function() { self.state.editor.focus(); }, 50);
+  },
+
+  updateEditorMeta: function() {
+    const tab = this.getActiveTab();
+    const nameInput = document.getElementById('script-name-input');
+    const roHint = document.getElementById('readonly-hint');
+    if (!tab) {
+      nameInput.value = '';
+      nameInput.disabled = true;
+      nameInput.classList.add('hidden');
+      roHint.classList.add('hidden');
+      return;
+    }
+    // Only show input field for local scripts (with scriptId)
+    if (tab.scriptId) {
+      const s = this.getScript(tab.scriptId);
+      nameInput.value = s ? s.name : tab.title;
+      nameInput.disabled = tab.readOnly;
+      nameInput.classList.remove('hidden');
+    } else {
+      nameInput.value = tab.title;
+      nameInput.disabled = true;
+      nameInput.classList.add('hidden');
+    }
+    roHint.classList.toggle('hidden', !tab.readOnly);
+  },
+
+  renderTabs: function() {
+    const self = this;
+    const strip = document.getElementById('tab-strip');
+    strip.innerHTML = '';
+    if (!this.state.openTabs.length) return;
+    this.state.openTabs.forEach(function(tab) {
+      const el = document.createElement('button');
+      el.className = 'tab' + (tab.id === self.state.activeTabId ? ' active' : '');
+      el.title = tab.title;
+      el.innerHTML =
+        '<span class="tree-version-left" style="gap:0.45rem; min-width:0; flex:1;">' +
+          icon(tab.remote ? 'eye' : 'file') +
+          '<span class="tab-title">' + tab.title + '</span>' +
+          (tab.dirty ? '<span class="tab-dirty"></span>' : '') +
+        '</span>' +
+        '<span class="tab-close">' + icon('close') + '</span>';
+      el.addEventListener('click', function(e) {
+        if (e.target.closest('.tab-close')) {
+          e.stopPropagation();
+          self.closeTab(tab.id);
+          return;
+        }
+        self.setActiveTab(tab.id);
+      });
+      strip.appendChild(el);
+    });
+  },
+
+  closeTab: function(tabId) {
+    const self = this;
+    const tab = this.state.openTabs.find(function(t) { return t.id === tabId; });
+    if (!tab) return;
+    if (tab.dirty && !tab.readOnly) {
+      if (!confirm('This tab has unsaved changes. Close anyway?')) return;
+    }
+    const i = this.state.openTabs.findIndex(function(t) { return t.id === tabId; });
+    this.state.openTabs.splice(i, 1);
+    if (this.state.activeTabId === tabId) {
+      const next = this.state.openTabs[Math.max(0, i - 1)] || this.state.openTabs[0] || null;
+      if (next) {
+        this.setActiveTab(next.id, { force: true });
+      } else {
+        this.state.activeTabId = null;
+        this.state.currentScriptId = null;
+        this.state.editor.setValue('');
+        this.updateEditorMeta();
+        this.updateUI();
+        this.renderTabs();
+        this.renderExplorer();
+      }
+    } else {
+      this.renderTabs();
+      this.renderExplorer();
+    }
+  },
+
+  updateTabLabels: function(sid) {
+    const self = this;
+    const script = this.getScript(sid);
+    if (!script) return;
+    this.state.openTabs.filter(function(t) { return t.scriptId === sid; }).forEach(function(tab) {
+      const v = tab.versionId ? self.getVersion(sid, tab.versionId) : null;
+      tab.title = tabTitle(script.name, v ? v.versionNumber : null);
+    });
+    this.renderTabs();
+    this.updateEditorMeta();
+  },
+
+  loadVersion: function(sid, vid) {
+    const script = this.getScript(sid);
+    if (!script) return;
+    const version = vid ? this.getVersion(sid, vid) : this.getLatest(sid);
+    if (this.state.unsavedChanges) {
+      if (!confirm('You have unsaved changes. Open the selected file anyway?')) return;
+    }
+    const content = version ? version.sourceCode : '';
+    const tabId = this.openTab(sid, { versionId: version ? version.id : null, content: content });
+    if (tabId) this.setActiveTab(tabId, { force: true });
+  },
+
+  saveVersion: function(opts) {
+    opts = opts || {};
+    const self = this;
+    const tab = this.getActiveTab();
+    if (!tab || tab.readOnly) {
+      notify('Cannot save read-only script', 'warning');
+      return Promise.resolve(null);
+    }
+    const code = this.state.editor.getValue();
+
+    // For remote scripts or new scripts without ID, create a local copy first
+    if (!tab.scriptId) {
+      // Show modal to ask for filename
+      const defaultName = tab.name || 'Untitled';
+      this.showModal('Save as new script', [
+        { id: 'filename', label: 'Filename', type: 'text', value: defaultName, placeholder: 'script.py' }
+      ], function(data) {
+        if (!data || !data.filename) {
+          notify('Save cancelled', 'info');
+          return;
+        }
+        const filename = ensurePy(data.filename.trim());
+        if (!filename) {
+          notify('Invalid filename', 'error');
+          return;
+        }
+        
+        const vid = generateUUID();
+        const sid = generateUUID();
+        const script = {
+          id: sid,
+          name: filename,
+          type: 'py',
+          activeVersionId: vid,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        const version = {
+          id: vid,
+          scriptId: sid,
+          parentVersionId: null,
+          branchId: 'main',
+          versionNumber: 1,
+          displayName: filename + ' (v1)',
+          commitMessage: 'Initial save',
+          sourceCode: code,
+          createdAt: new Date().toISOString(),
+          characterCount: code.length,
+          lineCount: code.split('\n').length,
+          sourceHash: code.length.toString(),
+          uploadedToCalculator: false, uploadedAt: null,
+          published: false, publishedAt: null, publishedPath: null
+        };
+        return dbPut('scripts', script).then(function() {
+          self.state.scripts.push(script);
+          return dbPut('versions', version).then(function() {
+            self.state.versions.push(version);
+            tab.scriptId = sid;
+            tab.versionId = vid;
+            tab.content = code;
+            tab.dirty = false;
+            tab.readOnly = false;
+            tab.remote = false;
+            tab.title = tabTitle(filename, 1);
+            self.state.unsavedChanges = false;
+            self.renderExplorer();
+            self.renderTabs();
+            self.updateEditorMeta();
+            self.updateUI();
+            notify('Script saved as ' + filename, 'success');
+            return version;
+          });
+        }).catch(function(e) {
+          console.error('Save failed:', e);
+          notify('Save failed: ' + e.message, 'error');
+          return null;
+        });
+      });
+      return Promise.resolve(null);
+    }
+
+    // If it's a local script, save to IndexedDB
+    const script = this.getScript(tab.scriptId);
+    if (!script) {
+      notify('Script not found', 'error');
+      return Promise.resolve(null);
+    }
+
+    return sha256(code).then(function(hash) {
+      if (!tab.versionId) {
+        // No version ID yet, create first version
+        const vid = generateUUID();
+        const version = {
+          id: vid,
+          scriptId: script.id,
+          parentVersionId: null,
+          branchId: 'main',
+          versionNumber: 1,
+          displayName: script.name + ' (v1)',
+          commitMessage: 'Initial save',
+          sourceCode: code,
+          createdAt: new Date().toISOString(),
+          characterCount: code.length,
+          lineCount: code.split('\n').length,
+          sourceHash: hash,
+          uploadedToCalculator: false, uploadedAt: null,
+          published: false, publishedAt: null, publishedPath: null
+        };
+        return dbPut('versions', version).then(function() {
+          self.state.versions.push(version);
+          script.activeVersionId = vid;
+          script.updatedAt = new Date().toISOString();
+          return dbPut('scripts', script);
+        }).then(function() {
+          tab.versionId = vid;
+          tab.content = code;
+          tab.dirty = false;
+          tab.title = tabTitle(script.name, 1);
+          self.state.unsavedChanges = false;
+          self.renderExplorer();
+          self.renderTabs();
+          self.updateEditorMeta();
+          self.updateUI();
+          if (!opts.silent) notify('Version saved', 'success');
+          return version;
+        });
+      }
+      
+      return dbGet('versions', tab.versionId).then(function(cur) {
+        if (cur && cur.sourceHash === hash && !opts.force) {
+          if (!opts.silent) notify('No changes detected', 'warning');
+          self.state.unsavedChanges = false;
+          self.updateUI();
+          return cur;
+        }
+        const vs = self.getVersions(script.id);
+        const nextNum = vs.length ? Math.max.apply(null, vs.map(function(v) { return v.versionNumber; })) + 1 : 1;
+        const version = {
+          id: generateUUID(), scriptId: script.id,
+          parentVersionId: cur ? cur.id : null,
+          branchId: cur ? cur.branchId : 'main',
+          versionNumber: nextNum,
+          displayName: script.name + ' (' + vLabel(nextNum) + ')',
+          commitMessage: opts.commitMessage || '',
+          sourceCode: code,
+          createdAt: new Date().toISOString(),
+          characterCount: code.length,
+          lineCount: code.split('\n').length,
+          sourceHash: hash,
+          uploadedToCalculator: false, uploadedAt: null,
+          published: false, publishedAt: null, publishedPath: null
+        };
+        return dbPut('versions', version).then(function() {
+          self.state.versions.push(version);
+          script.activeVersionId = version.id;
+          script.updatedAt = new Date().toISOString();
+          return dbPut('scripts', script);
+        }).then(function() {
+          const rp = {
+            id: generateUUID(), scriptId: script.id, versionId: version.id,
+            name: script.name + ' ' + amsDisplay(new Date()),
+            description: 'Automatic restore point',
+            createdAt: new Date().toISOString()
+          };
+          return dbPut('restorePoints', rp).then(function() {
+            self.state.restorePoints.push(rp);
+          });
+        }).then(function() {
+          tab.versionId = version.id;
+          tab.content = code;
+          tab.dirty = false;
+          tab.title = tabTitle(script.name, version.versionNumber);
+          self.state.unsavedChanges = false;
+          self.renderExplorer();
+          self.renderTabs();
+          self.updateEditorMeta();
+          self.updateUI();
+          if (!opts.silent) notify('Version saved', 'success');
+          return version;
+        });
+      });
+    }).catch(function(e) {
+      console.error('Save failed:', e);
+      notify('Save failed: ' + e.message, 'error');
+      return null;
+    });
+  },
+
+  loadToCalc: function() {
+    const self = this;
+    const tab = this.getActiveTab();
+    if (!tab || tab.readOnly) {
+      notify('Open a local script first', 'warning');
+      return;
+    }
+    if (!this.state.calc.isConnected) {
+      notify('Please connect the calculator first', 'warning');
+      return;
+    }
+    const script = this.getScript(tab.scriptId);
+    if (!script) return;
+    const code = this.state.editor.getValue();
+    const doUpload = function() {
+      return self.state.calc.getScripts().then(function(list) {
+        const exists = list.some(function(s) { return s.name.toLowerCase() === script.name.toLowerCase(); });
+        const msg = exists
+          ? 'Load "' + script.name + '" to the calculator? This will overwrite the existing file.'
+          : 'Load "' + script.name + '" to the calculator as a new file?';
+        if (!confirm(msg)) return;
+        notify('Uploading to calculator...', 'info');
+        return self.state.calc.uploadScript(script.name, code).then(function() {
+          return tab.versionId ? dbGet('versions', tab.versionId) : null;
+        }).then(function(v) {
+          if (v) {
+            v.uploadedToCalculator = true;
+            v.uploadedAt = new Date().toISOString();
+            return dbPut('versions', v);
+          }
+        }).then(function() {
+          notify('Uploaded and verified successfully', 'success');
+          self.renderExplorer();
+        }).catch(function(e) {
+          notify('Upload failed: ' + e.message, 'error');
+        });
+      }).catch(function(e) {
+        notify('Upload failed: ' + e.message, 'error');
+      });
+    };
+    if (tab.dirty) {
+      this.saveVersion({ silent: true, force: true }).then(doUpload);
+    } else {
+      doUpload();
+    }
+  },
+
+  syncFromCalc: function() {
+    const self = this;
+    return this.state.calc.getScripts().then(function(list) {
+      return Promise.all(list.map(function(cs) {
+        return sha256(cs.code).then(function(hash) {
+          const name = ensurePy(cs.name);
+          const existing = self.state.scripts.find(function(s) { return s.name === name; });
+          if (!existing) {
+            const script = {
+              id: generateUUID(), name: name, activeVersionId: null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              published: false, publishedAt: null
+            };
+            return dbPut('scripts', script).then(function() {
+              self.state.scripts.push(script);
+              const v = {
+                id: generateUUID(), scriptId: script.id,
+                parentVersionId: null, branchId: 'main', versionNumber: 1,
+                displayName: name + ' (v1.0)', commitMessage: 'Imported from calculator',
+                sourceCode: cs.code, createdAt: new Date().toISOString(),
+                characterCount: cs.code.length, lineCount: cs.code.split('\n').length,
+                sourceHash: hash, uploadedToCalculator: true, uploadedAt: new Date().toISOString(),
+                published: false, publishedAt: null, publishedPath: null
+              };
+              return dbPut('versions', v).then(function() {
+                self.state.versions.push(v);
+                script.activeVersionId = v.id;
+                return dbPut('scripts', script);
+              });
+            });
+          }
+          return dbGet('versions', existing.activeVersionId).then(function(av) {
+            if (av && av.sourceHash === hash) return null;
+            const vs = self.getVersions(existing.id);
+            const n = vs.length ? Math.max.apply(null, vs.map(function(v) { return v.versionNumber; })) + 1 : 1;
+            const v = {
+              id: generateUUID(), scriptId: existing.id,
+              parentVersionId: existing.activeVersionId,
+              branchId: av ? av.branchId : 'main',
+              versionNumber: n,
+              displayName: existing.name + ' (' + vLabel(n) + ')',
+              commitMessage: 'Synced from device',
+              sourceCode: cs.code, createdAt: new Date().toISOString(),
+              characterCount: cs.code.length, lineCount: cs.code.split('\n').length,
+              sourceHash: hash, uploadedToCalculator: true, uploadedAt: new Date().toISOString(),
+              published: false, publishedAt: null, publishedPath: null
+            };
+            return dbPut('versions', v).then(function() {
+              self.state.versions.push(v);
+              existing.activeVersionId = v.id;
+              existing.updatedAt = new Date().toISOString();
+              return dbPut('scripts', existing);
+            });
+          });
+        });
+      })).then(function() {
+        return Promise.all([dbAll('scripts'), dbAll('versions')]);
+      }).then(function(res) {
+        self.state.scripts = res[0];
+        self.state.versions = res[1];
+        self.renderExplorer();
+        notify('Calculator scripts synchronized', 'success');
+      });
+    }).catch(function(e) {
+      notify('Sync failed: ' + e.message, 'error');
+    });
+  },
+
+  updateCalcStatus: function(connected, info) {
+    const dot = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    const btn = document.getElementById('btn-connect');
+    if (connected) {
+      dot.classList.add('connected');
+      const label = (info && (info.model || info.name || info.device)) || this.state.calc.getDeviceLabel();
+      text.textContent = 'Connected — ' + label;
+      btn.title = 'Reconnect';
+    } else {
+      dot.classList.remove('connected');
+      text.textContent = 'Not connected';
+      btn.title = 'Connect calculator';
+    }
+  },
+
+  renderExplorer: function() {
+    const self = this;
+    const tree = document.getElementById('script-tree');
+    tree.innerHTML = '';
+    if (!this.state.scripts.length) {
+      tree.innerHTML = '<div class="empty-state">No scripts yet</div>';
+      return;
+    }
+    const scripts = this.state.scripts.slice().sort(function(a, b) {
+      return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
+    scripts.forEach(function(script) {
+      const versions = self.getVersions(script.id);
+      const cur = script.activeVersionId
+        ? self.getVersion(script.id, script.activeVersionId)
+        : self.getLatest(script.id);
+      const node = document.createElement('div');
+      node.className = 'tree-node' + (self.state.currentScriptId === script.id ? ' active' : '');
+      node.dataset.scriptId = script.id;
+      node.innerHTML =
+        '<button class="tree-script-row">' +
+          '<span class="tree-script-left">' +
+            '<span class="caret">' + icon('chevron') + '</span>' +
+            icon('folder') +
+            '<span class="tree-script-name">' + script.name + '</span>' +
+          '</span>' +
+          '<span class="tree-script-meta">' + (cur ? vLabel(cur.versionNumber) : 'draft') + '</span>' +
+        '</button>' +
+        '<div class="tree-versions"></div>';
+
+      const row = node.querySelector('.tree-script-row');
+      const nameEl = node.querySelector('.tree-script-name');
+      row.addEventListener('click', function(e) {
+        if (!e.target.closest('.tree-script-name')) node.classList.toggle('expanded');
+      });
+      nameEl.style.cursor = 'pointer';
+      nameEl.addEventListener('click', function(e) {
+        e.stopPropagation();
+        self.loadVersion(script.id, script.activeVersionId || null);
+      });
+
+      const wrap = node.querySelector('.tree-versions');
+      versions.forEach(function(v) {
+        const ve = document.createElement('button');
+        ve.dataset.versionId = v.id;
+        const activeTab = self.getActiveTab();
+        const isCur = activeTab && activeTab.versionId === v.id;
+        ve.className = 'tree-version-row' + (isCur ? ' current' : '') + (v.published ? ' published' : '');
+        const rp = self.state.restorePoints.find(function(r) { return r.versionId === v.id; });
+        ve.innerHTML =
+          '<span class="tree-version-left">' +
+            icon('file') +
+            '<span class="tree-version-name">' + script.name + ' (' + vLabel(v.versionNumber) + ')</span>' +
+          '</span>' +
+          '<span class="tree-version-meta">' + (rp ? '★ ' : '') + amsDisplay(new Date(v.createdAt)) + '</span>';
+        ve.addEventListener('click', function() {
+          node.classList.add('expanded');
+          self.loadVersion(script.id, v.id);
+        });
+        wrap.appendChild(ve);
+      });
+      if (self.state.currentScriptId === script.id) node.classList.add('expanded');
+      tree.appendChild(node);
+    });
+  },
+
+  refreshMarket: function(force) {
+    const self = this;
+    const q = (document.getElementById('market-search-input').value || '').trim();
+    this.state.marketQuery = q;
+    if (!force && this.state.marketplaceInitialized) {
+      this.renderMarket();
+      return Promise.resolve();
+    }
+    statusPill('Loading marketplace…', 'warning');
+
+    const tryFetch = function(branch) {
+      const url = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/git/trees/' + branch + '?recursive=1';
+      return fetch(url, { headers: { 'Accept': 'application/vnd.github+json' } })
+        .then(function(res) {
+          if (res.status >= 400) throw new Error('GitHub ' + res.status);
+          return res.json().then(function(data) {
+            return { branch: branch, allFiles: data.tree || [] };
+          });
+        });
+    };
+
+    return tryFetch(GITHUB_BRANCH).then(function(result) {
+      let py = result.allFiles.filter(function(i) {
+        return i.type === 'blob' && i.path && typeof i.path === 'string' && i.path.endsWith('.py');
+      });
+      if (py.length === 0 && GITHUB_BRANCH.toLowerCase() === 'main') {
+        return tryFetch('master').then(function(fb) {
+          const fbPy = fb.allFiles.filter(function(i) {
+            return i.type === 'blob' && i.path && typeof i.path === 'string' && i.path.endsWith('.py');
+          });
+          if (fbPy.length > 0) return { branch: 'master', allFiles: fb.allFiles, pyFiles: fbPy };
+          return { branch: result.branch, allFiles: result.allFiles, pyFiles: py };
+        });
+      }
+      return { branch: result.branch, allFiles: result.allFiles, pyFiles: py };
+    }).then(function(result) {
+      const py = result.pyFiles;
+      const all = result.allFiles;
+      const branch = result.branch;
+      py.forEach(function(item) {
+        const fn = item.path.split('/').pop();
+        const base = fn.replace(/\.py$/i, '');
+        const sl = item.path.lastIndexOf('/');
+        const dir = sl >= 0 ? item.path.substring(0, sl + 1) : '';
+        const pngP = dir + base + '.png';
+        const jpgP = dir + base + '.jpg';
+        if (all.some(function(f) { return f.path === pngP; })) {
+          item.iconUrl = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/' + branch + '/' + pngP;
+        } else if (all.some(function(f) { return f.path === jpgP; })) {
+          item.iconUrl = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/' + branch + '/' + jpgP;
+        }
+        item.name = fn;
+        item.__branch = branch;
+      });
+      return Promise.allSettled(py.slice(0, 30).map(function(item) {
+        const raw = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/' + branch + '/' + item.path;
+        return fetch(raw).then(function(r) {
+          if (!r.ok) throw 0;
+          return r.text();
+        }).then(function(txt) {
+          const fl = txt.split('\n')[0].trim();
+          item.description = fl.charAt(0) === '#' ? fl.substring(1).trim() : '';
+        }).catch(function() { item.description = ''; });
+      })).then(function() {
+        self.state.marketCache = py;
+        self.state.marketplaceInitialized = true;
+        statusPill(py.length + ' scripts available', 'success');
+      });
+    }).catch(function(e) {
+      console.error('Marketplace:', e);
+      self.state.marketCache = [];
+      statusPill('Marketplace error: ' + e.message, 'error');
+    }).then(function() {
+      self.renderMarket();
+    });
+  },
+
+  renderMarket: function() {
+    const self = this;
+    const results = document.getElementById('market-results');
+    const q = (this.state.marketQuery || '').toLowerCase();
+    const items = this.state.marketCache.filter(function(i) {
+      if (!q) return true;
+      return (i.name || '').toLowerCase().indexOf(q) !== -1 || (i.path || '').toLowerCase().indexOf(q) !== -1;
+    });
+    results.innerHTML = '';
+    if (!this.state.marketCache.length) {
+      results.innerHTML = '<div class="empty-state">No marketplace scripts found yet.</div>';
+      return;
+    }
+    if (!items.length) {
+      results.innerHTML = '<div class="empty-state">No results matched your search.</div>';
+      return;
+    }
+    items.slice(0, 50).forEach(function(item) {
+      const card = document.createElement('div');
+      card.className = 'market-card';
+      const iconHtml = item.iconUrl
+        ? '<img src="' + item.iconUrl + '" style="width:20px;height:20px;border-radius:4px;object-fit:cover;margin-right:8px;" alt="">'
+        : '';
+      const descHtml = item.description ? '<div class="market-subtitle">' + item.description + '</div>' : '';
+      card.innerHTML =
+        '<div class="market-row">' +
+          '<div style="min-width:0; display:flex; align-items:center;">' +
+            iconHtml +
+            '<div style="min-width:0;">' +
+              '<div class="market-title">' + (item.name || 'Unknown') + '</div>' +
+              descHtml +
+            '</div>' +
+          '</div>' +
+          '<button class="market-action" title="Load">' + icon('eye') + '</button>' +
+        '</div>';
+      card.querySelector('.market-action').addEventListener('click', function() {
+        self.loadMarket(item);
+      });
+      results.appendChild(card);
+    });
+  },
+
+  loadMarket: function(item) {
+    const self = this;
+    notify('Loading script…', 'info');
+    const branch = item.__branch || GITHUB_BRANCH;
+    const raw = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/' + branch + '/' + item.path;
+    return fetch(raw).then(function(r) {
+      if (!r.ok) throw new Error('Load failed (' + r.status + ')');
+      return r.text();
+    }).then(function(content) {
+      const tabId = self.openRemote(item.name || 'Unknown', content);
+      self.setActiveTab(tabId, { force: true });
+      notify('Script opened', 'success');
+    }).catch(function(e) {
+      notify('Load failed: ' + e.message, 'error');
+    });
+  },
+
+  publish: function() {
+    const self = this;
+    const tab = this.getActiveTab();
+    if (!tab || tab.readOnly) {
+      notify('Cannot publish read-only script', 'warning');
+      return;
+    }
+
+    // If tab doesn't have a scriptId, save it first to create a local copy
+    if (!tab.scriptId) {
+      notify('Saving script locally before publishing...', 'info');
+      this.saveVersion({ silent: false, force: true }).then(function(result) {
+        if (result) {
+          // After saving, the tab will have a scriptId, so call publish again
+          self.publish();
+        }
+      });
+      return;
+    }
+
+    const script = this.getScript(tab.scriptId);
+    if (!script) return;
+
+    const doPublish = function() {
+      if (!script.activeVersionId) {
+        notify('Save a version first', 'warning');
+        return;
+      }
+      return dbGet('versions', script.activeVersionId).then(function(av) {
+        if (!av) {
+          notify('Save a version first', 'warning');
+          return;
+        }
+        const endpoint = 'https://db-5-nmwrks-tkn-pldr.vercel.app/api/upload';
+        const content = self.state.editor.getValue();
+        const rawName = (script.name || '').trim();
+        const parts = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Europe/Amsterdam',
+          year: 'numeric', month: 'numeric', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', hour12: false
+        }).formatToParts(new Date());
+        function pick(t) { const f = parts.find(function(p) { return p.type === t; }); return f ? f.value : ''; }
+        const tsName = Number(pick('day')) + '-' + Number(pick('month')) + '-' + pick('year') + '-' + pick('hour') + ':' + pick('minute');
+        const filename = rawName ? rawName.replace(/\.py$/i, '') + '.py' : tsName + '.py';
+
+        notify('Publishing...', 'info');
+        return fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: filename, content: content, commitMessage: 'Publish ' + filename })
+        }).then(function(res) {
+          return res.json().then(function(data) {
+            if (!res.ok) throw new Error(data.error || 'Publish failed');
+            av.published = true;
+            av.publishedAt = new Date().toISOString();
+            av.publishedPath = filename;
+            return dbPut('versions', av).then(function() {
+              script.published = true;
+              script.publishedAt = av.publishedAt;
+              return dbPut('scripts', script);
+            }).then(function() {
+              self.renderExplorer();
+              notify('Published: ' + filename, 'success');
+              const btn = document.getElementById('btn-publish');
+              btn.innerHTML = icon('check');
+              setTimeout(function() { setIconButton(btn, 'cloud'); }, 1400);
+            });
+          });
+        }).catch(function(e) {
+          notify('Publish failed: ' + e.message, 'error');
+          const btn = document.getElementById('btn-publish');
+          btn.innerHTML = icon('warning');
+          setTimeout(function() { setIconButton(btn, 'cloud'); }, 1400);
+        });
+      });
+    };
+
+    if (tab.dirty) {
+      this.saveVersion({ silent: true, force: true }).then(doPublish);
+    } else {
+      doPublish();
+    }
+  },
+
+  exportAll: function() {
+    notify('Generating backup…', 'info');
+    const zip = new JSZip();
+    Promise.all([dbAll('scripts'), dbAll('versions'), dbAll('restorePoints')]).then(function(res) {
+      const scripts = res[0], versions = res[1], rps = res[2];
+      const manifest = {
+        application: 'DUB5 Python Version Manager',
+        exportedAt: new Date().toISOString(),
+        scripts: scripts.map(function(s) { return { id: s.id, name: s.name }; }),
+        versions: versions.map(function(v) { return { id: v.id, scriptId: v.scriptId, versionNumber: v.versionNumber }; }),
+        restorePoints: rps
+      };
+      zip.file('README.txt', 'DUB5 Python Version Manager Backup\nExported: ' + new Date().toISOString() + '\n');
+      zip.file('manifest.json', JSON.stringify(manifest, null, 2));
+      const scriptsFolder = zip.folder('scripts');
+      const versionsFolder = zip.folder('versions');
+      const rpFolder = zip.folder('restore-points');
+      scripts.forEach(function(script) {
+        const sv = versions.filter(function(v) { return v.scriptId === script.id; })
+          .sort(function(a, b) { return b.versionNumber - a.versionNumber; });
+        const latest = sv[0];
+        if (latest) scriptsFolder.file(script.name, latest.sourceCode);
+        const vf = versionsFolder.folder(script.name.replace(/\.py$/i, ''));
+        sv.forEach(function(v) {
+          const pad = String(v.versionNumber).padStart(3, '0');
+          const safe = (v.displayName || 'v' + v.versionNumber).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+          vf.file(pad + '-' + safe + '.py', v.sourceCode);
+        });
+      });
+      rpFolder.file('restore-points.json', JSON.stringify(rps, null, 2));
+      return zip.generateAsync({ type: 'blob' });
+    }).then(function(content) {
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dub5-backup-' + new Date().toISOString().split('T')[0] + '.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+      notify('Backup exported', 'success');
+    }).catch(function(e) {
+      notify('Export failed: ' + e.message, 'error');
+    });
+  },
+
+  updateUI: function() {
+    const ind = document.getElementById('unsaved-indicator');
+    const activeTab = this.getActiveTab();
+    
+    if (!activeTab) {
+      ind.classList.add('hidden');
+    } else if (this.state.unsavedChanges) {
+      ind.classList.remove('hidden', 'saved');
+      ind.textContent = '● Unsaved changes';
+    } else {
+      ind.classList.remove('hidden');
+      ind.classList.add('saved');
+      ind.textContent = '● Saved';
+    }
+    
+    const bs = document.getElementById('btn-save-version');
+    const bp = document.getElementById('btn-publish');
+    const bu = document.getElementById('btn-upload');
+    const si = document.getElementById('script-name-input');
+    const rh = document.getElementById('readonly-hint');
+    if (!activeTab) {
+      bs.disabled = true; bp.disabled = true; bu.disabled = true;
+      si.disabled = true; rh.classList.add('hidden');
+    } else {
+      bs.disabled = !!activeTab.readOnly;
+      bp.disabled = !!activeTab.readOnly;
+      bu.disabled = !!activeTab.readOnly;
+      si.disabled = !!activeTab.readOnly && !activeTab.remote;
+      rh.classList.toggle('hidden', !activeTab.readOnly);
+    }
+  },
+
+  showModal: function(title, fields, onSubmit) {
+    const root = document.getElementById('modal-root');
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    const fieldsHtml = fields.map(function(f) {
+      if (f.type === 'checkbox') {
+        return '<label class="modal-checkbox-label"><input type="checkbox" id="m-' + f.id + '"' + (f.checked ? ' checked' : '') + '> ' + f.label + '</label>';
+      }
+      return '<label for="m-' + f.id + '">' + f.label + '</label><input type="' + f.type + '" id="m-' + f.id + '" class="modal-input" placeholder="' + (f.placeholder || '') + '" value="' + (f.value || '') + '">';
+    }).join('');
+    overlay.innerHTML =
+      '<div class="modal"><h3>' + title + '</h3>' + fieldsHtml +
+      '<div class="modal-actions"><button class="cancel">Cancel</button><button class="primary confirm">Confirm</button></div></div>';
+    root.appendChild(overlay);
+    overlay.querySelector('.cancel').onclick = function() { overlay.remove(); };
+    overlay.querySelector('.confirm').onclick = function() {
+      const data = {};
+      fields.forEach(function(f) {
+        if (f.type === 'checkbox') data[f.id] = document.getElementById('m-' + f.id).checked ? 'on' : 'off';
+        else data[f.id] = document.getElementById('m-' + f.id).value;
+      });
+      try {
+        const r = onSubmit(data);
+        if (r && r.then) r.then(function() { overlay.remove(); }).catch(function(e) {
+          notify(e.message || 'Failed', 'error');
+        });
+        else overlay.remove();
+      } catch (e) {
+        notify(e.message || 'Failed', 'error');
+      }
+    };
+    const first = overlay.querySelector('.modal-input');
+    if (first) first.focus();
+  }
+};
+
+// expose for debugging
+window.app = app;
+
+// boot the app
+app.init();
+
+// Global topbar scroll effect
+const globalTopbar = document.getElementById('globalTopbar');
+if (globalTopbar) {
+  let ticking = false;
+  function update() {
+    const y = window.scrollY || window.pageYOffset || 0;
+    globalTopbar.classList.toggle('is-scrolled', y > 24);
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+  update();
+}
+</script>
+</body>
+</html>

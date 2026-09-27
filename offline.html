@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1150">
+  <title>Offline - DUB5</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shell.css">
+  <style>
+    :root {
+      --glass: rgba(9, 13, 38, 0.62);
+      --glass-hover: rgba(13, 19, 50, 0.72);
+      --glass-blur: blur(16px) saturate(160%);
+      --glass-shadow: 0 18px 40px -26px rgba(0, 0, 0, 1);
+      --line: rgba(224, 242, 254, 0.16);
+      --line-strong: rgba(224, 242, 254, 0.30);
+      --ink: rgb(226, 240, 255);
+      --ink-dim: rgba(226, 240, 255, 0.60);
+      --r-pill: 999px;
+      --dur-hover: 300ms;
+      --ease-hover: ease-in-out;
+      --font-display: 'DM Serif Display', Georgia, serif;
+    }
+
+    .offline-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 2rem;
+      color: var(--ink-dim);
+    }
+
+    .offline-title {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .offline-message {
+      font-size: 1.1rem;
+      color: var(--ink-dim);
+      max-width: 400px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .retry-btn {
+      background: var(--glass);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--line);
+      border-radius: var(--r-pill);
+      padding: 14px 28px;
+      color: var(--ink);
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: var(--glass-shadow);
+      cursor: pointer;
+      transition: background var(--dur-hover) var(--ease-hover),
+                  border-color var(--dur-hover) var(--ease-hover),
+                  transform var(--dur-hover) var(--ease-hover);
+    }
+
+    .retry-btn:hover {
+      background: var(--glass-hover);
+      border-color: var(--line-strong);
+      transform: translateY(-2px);
+    }
+
+    .retry-btn:focus-visible {
+      outline: 2px solid rgba(224, 242, 254, 0.8);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <svg class="offline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 1l22 22"/>
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+      <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+      <path d="M12 20h.01"/>
+    </svg>
+    <h1 class="offline-title">Je bent offline</h1>
+    <p class="offline-message">
+      Geen internetverbinding beschikbaar. Sommige functies werken mogelijk niet.
+    </p>
+    <button class="retry-btn" onclick="window.location.reload()">
+      Opnieuw proberen
+    </button>
+  </div>
+
+  <script>
+    // Auto-retry when connection is restored
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

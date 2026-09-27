@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Galerij & Herinneringen - DUB5</title>
+<meta name="theme-color" content="#0b1150" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --line: rgba(224, 242, 254, 0.16);
+    --line-strong: rgba(224, 242, 254, 0.3);
+    --ink: rgb(226, 240, 255);
+    --ink-dim: rgba(226, 240, 255, 0.6);
+    --glass: rgba(9, 13, 38, 0.62);
+    --glass-hover: rgba(13, 19, 50, 0.72);
+    --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+    --glass-shadow: 0 18px 40px -26px rgba(0, 0, 0, 1);
+    --glass-blur: blur(16px) saturate(160%);
+    --nav-hover-transition-duration: 300ms;
+    --nav-hover-transition-timing: ease-in-out;
+    --r-pill: 999px;
+    --r-panel: 18px;
+    --r-chip: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(140% 100% at 50% -10%, #0b1150 0%, #050833 42%, #01030f 100%);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -15%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(42% 34% at 16% 10%, rgba(70, 110, 255, 0.20), transparent 68%),
+      radial-gradient(38% 30% at 86% 16%, rgba(150, 80, 255, 0.15), transparent 66%),
+      radial-gradient(58% 42% at 52% 108%, rgba(0, 130, 230, 0.18), transparent 72%);
+    filter: blur(26px);
+  }
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: block;
+  }
+  .page {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem 4rem;
+  }
+  .page-header {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    margin-bottom: 2.25rem;
+  }
+
+  .back-link-fixed {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    color: var(--ink-dim);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--nav-hover-transition-duration) var(--nav-hover-transition-timing), border-color var(--nav-hover-transition-duration) var(--nav-hover-transition-timing), transform var(--nav-hover-transition-duration) var(--nav-hover-transition-timing), background var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+  .back-link-fixed:hover, .back-link-fixed:focus-visible {
+    color: #fff;
+    border-color: var(--line-strong);
+    background: var(--glass-hover);
+    transform: translateY(-2px);
+    outline: none;
+  }
+  .back-link-fixed:focus-visible { outline: 2px solid rgba(224, 242, 254, 0.8); outline-offset: 3px; }
+  .back-link-fixed svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-weight: normal;
+    font-size: 4.5rem;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(120, 170, 255, 0.28);
+    opacity: 0;
+    animation: fade-in 700ms ease-out 80ms forwards;
+  }
+  .page-subline {
+    font-size: 0.95rem;
+    color: var(--ink-dim);
+    opacity: 0;
+    animation: fade-in 700ms ease-out 200ms forwards;
+  }
+  .header-rule {
+    height: 1px;
+    width: 100%;
+    max-width: 960px;
+    margin-top: 1.75rem;
+    transform: scaleX(0);
+    transform-origin: center center;
+    background: linear-gradient(90deg, rgba(190, 215, 255, 0) 0%, rgba(190, 215, 255, 0.35) 12%, rgba(214, 232, 255, 0.72) 50%, rgba(190, 215, 255, 0.35) 88%, rgba(190, 215, 255, 0) 100%);
+    opacity: 0.75;
+    animation: rule-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) 320ms forwards;
+  }
+  .content-shell {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    border-radius: var(--r-panel);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    padding: 2rem;
+    opacity: 0;
+    animation: card-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 420ms forwards;
+  }
+  
+  /* Gallery-specific styles */
+  .gallery-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .view-switch {
+    position: relative;
+    display: inline-flex;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+  }
+
+  .switch-thumb {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.06));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 8px 20px -12px rgba(0, 0, 0, 1);
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .view-switch button {
+    position: relative;
+    z-index: 2;
+    appearance: none;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    padding: 0.55rem 1.4rem;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--ink-dim);
+    transition: color 0.3s ease;
+    white-space: nowrap;
+  }
+  .view-switch button:hover { color: rgba(255, 255, 255, 0.85); }
+  .view-switch button.is-active { color: #fff; }
+  .view-switch button:focus-visible {
+    outline: 2px solid rgba(150, 190, 255, 0.85);
+    outline-offset: 3px;
+  }
+  
+  .gallery-grid {
+    display: grid;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .gallery-grid.grid-1 { grid-template-columns: 1fr; }
+  .gallery-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .gallery-grid.grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .gallery-grid.grid-4 { grid-template-columns: repeat(4, 1fr); }
+  
+  @media (max-width: 900px) {
+    .gallery-grid.grid-3, .gallery-grid.grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  @media (max-width: 600px) {
+    .gallery-grid.grid-2, .gallery-grid.grid-3, .gallery-grid.grid-4 { grid-template-columns: 1fr; }
+  }
+  
+  .gallery-item {
+    position: relative;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    border-radius: var(--r-chip);
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    cursor: pointer;
+    transition: transform var(--nav-hover-transition-duration) var(--nav-hover-transition-timing), box-shadow var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+  
+  .gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  .gallery-item video, .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .gallery-item .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    opacity: 0;
+    transition: opacity var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1rem;
+  }
+  
+  .gallery-item:hover .overlay { opacity: 1; }
+  
+  .gallery-item .overlay h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.25rem;
+  }
+  
+  .gallery-item .overlay p {
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+  }
+  
+  .gallery-item .actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+  
+  .gallery-item:hover .actions { opacity: 1; }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--r-chip);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+  
+  .action-btn:hover { background: var(--glass-hover); }
+  
+  .layout-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    flex-shrink: 0;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink-dim);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease, transform 200ms ease;
+  }
+  
+  .layout-toggle:hover {
+    color: #fff;
+    outline: none;
+  }
+  
+  .layout-toggle:active { transform: scale(0.9); }
+  
+  .layout-toggle svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+  
+  .modal.active { opacity: 1; pointer-events: all; }
+  
+  .modal-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .modal-content video, .modal-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: var(--r-panel);
+  }
+  
+  .modal-info {
+    text-align: center;
+  }
+  
+  .modal-info h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-info p {
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: background var(--nav-hover-transition-duration) var(--nav-hover-transition-timing);
+  }
+  
+  .modal-close:hover { background: var(--glass-hover); }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--ink-dim);
+  }
+  
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state p { margin-bottom: 0.5rem; }
+  
+  .empty-state code {
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    background: var(--glass);
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+  
+  /* =========================================================
+     TOPBAR — transparent on load, glass bar on scroll
+     ========================================================= */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+  }
+
+  .topbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(6, 9, 28, 0.55);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    border-bottom: 1px solid rgba(224, 242, 254, 0.12);
+    box-shadow: 0 24px 50px -40px rgba(0, 0, 0, 1);
+    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .topbar.is-scrolled::before {
+    opacity: 1;
+  }
+
+  .topbar-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.95rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: padding 420ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .topbar.is-scrolled .topbar-inner {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #fff;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .brand-mark {
+    width: 18px;
+    height: 18px;
+    color: #cfe3ff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  
+  .brand-mark .brand-star {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    animation: brand-star-pulse 3s ease-in-out infinite;
+  }
+  
+  .brand-mark .brand-star::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(205,222,255,0.8) 20%, rgba(255,236,214,0.4) 50%, rgba(186,205,255,0.1) 80%, transparent 100%);
+    border-radius: 50%;
+    animation: brand-star-glow 2s ease-in-out infinite alternate;
+  }
+
+  .brand-mark svg {
+    display: none;
+  }
+
+  .topbar-links {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-left: auto;
+  }
+  .topbar-links::-webkit-scrollbar { display: none; }
+
+  .topbar-link {
+    flex-shrink: 0;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--ink-dim);
+    padding: 0.5rem 0.85rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: color 300ms ease;
+  }
+  .topbar-link:hover,
+  .topbar-link:focus-visible {
+    color: #fff;
+    outline: none;
+    background: transparent;
+  }
+
+  .layout-btn {
+    flex-shrink: 0;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink-dim);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 200ms ease, transform 200ms ease;
+    margin-left: 0.35rem;
+  }
+  .layout-btn:hover,
+  .layout-btn:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+  .layout-btn:active { transform: scale(0.9); }
+  .layout-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  
+  @keyframes brand-star-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  
+  @keyframes brand-star-glow {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+  
+  .page-footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    text-align: center;
+    opacity: 0;
+    animation: fade-in 700ms ease-out 620ms forwards;
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(9px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes rule-draw {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .page-title, .page-subline, .header-rule, .content-shell, .page-footer {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+    }
+    .back-link, .filter-btn, .gallery-item, .action-btn, .layout-toggle { transition: none !important; }
+  }
+  
+  @media (max-width: 768px) {
+    .page { padding: 2rem 1rem 3rem; }
+    .page-title { font-size: 2.75rem; }
+    .content-shell { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+  
+  <!-- ============ TOPBAR ============ -->
+  <nav class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <a class="topbar-brand" href="/">
+        <span class="brand-mark" aria-hidden="true">
+          <div class="brand-star"></div>
+        </span>
+        <span>DUB5</span>
+      </a>
+      <div class="topbar-links">
+        <a class="topbar-link" href="/#games" data-nav="games">Games</a>
+        <a class="topbar-link" href="/#tools" data-nav="tools">Tools</a>
+        <a class="topbar-link" href="/#study" data-nav="study">Studie</a>
+        <a class="topbar-link" href="/#hacks" data-nav="hacks">Hacks</a>
+        <a class="topbar-link" href="/#guides" data-nav="guides">Uitleg</a>
+        <a class="topbar-link" href="/#gallery" data-nav="gallery">Galerij</a>
+      </div>
+      <button class="layout-btn" id="layoutBtn" title="Layout: Pill" aria-label="Layout wisselen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="7" rx="1.5"/>
+          <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+          <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+  
+  <button class="layout-toggle" id="layoutToggle" title="Layout wisselen" aria-label="Layout wisselen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="7" rx="1.5"/>
+      <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+      <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+    </svg>
+  </button>
+
+  <main class="page">
+    <a class="back-link-fixed" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"/>
+          <path d="m12 19-7-7 7-7"/>
+        </svg>
+        Terug naar DUB5
+      </a>
+    <header class="page-header">
+      <h1 class="page-title">Galerij & Herinneringen</h1>
+      <p class="page-subline">Funny moments, video's en foto's uit onze avonturen</p>
+    </header>
+    <div class="header-rule" aria-hidden="true"></div>
+    <section class="content-shell">
+      <div class="gallery-controls">
+        <div class="view-switch" id="filterSwitch" data-active="all" role="group" aria-label="Filter kiezen">
+          <span class="switch-thumb" id="filterThumb" aria-hidden="true"></span>
+          <button type="button" data-filter="all" class="is-active" aria-pressed="true">Alles</button>
+          <button type="button" data-filter="images" aria-pressed="false">Foto's</button>
+          <button type="button" data-filter="videos" aria-pressed="false">Video's</button>
+        </div>
+      </div>
+      <div class="gallery-grid grid-3" id="galleryGrid">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5-5 5-3-3-3 3v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/>
+          </svg>
+          <p>Nog geen afbeeldingen of video's toegevoegd.</p>
+          <p>Voeg bestanden toe aan de <code>gallery/assets</code> map om ze hier te tonen.</p>
+        </div>
+      </div>
+    </section>
+    <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
+  </main>
+
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-content">
+      <div id="modalMedia"></div>
+      <div class="modal-info">
+        <h3 id="modalTitle"></h3>
+        <p id="modalDesc"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./starfield.js"></script>
+  <script>
+    const galleryGrid = document.getElementById('galleryGrid');
+    const modal = document.getElementById('modal');
+    const modalMedia = document.getElementById('modalMedia');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalClose = document.getElementById('modalClose');
+    const filterSwitch = document.getElementById('filterSwitch');
+    const filterThumb = document.getElementById('filterThumb');
+    const layoutToggle = document.getElementById('layoutToggle');
+
+    let currentLayout = 3;
+    const layouts = [1, 2, 3, 4];
+
+    // Sample gallery items - replace with actual assets
+    const galleryItems = [
+      // Add your actual images/videos here
+      // Example:
+      // { type: 'image', src: './assets/funny-moment-1.jpg', title: 'Funny Moment 1', desc: 'Description' },
+      // { type: 'video', src: './assets/funny-moment-1.mp4', title: 'Funny Video 1', desc: 'Description' },
+    ];
+
+    function renderGallery(filter = 'all') {
+      const filtered = filter === 'all' 
+        ? galleryItems 
+        : galleryItems.filter(item => item.type === filter.slice(0, -1)); // 'images' -> 'image', 'videos' -> 'video'
+
+      if (filtered.length === 0) {
+        galleryGrid.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5-5 5-3-3-3 3v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/>
+            </svg>
+            <p>${filter === 'all' ? 'Nog geen afbeeldingen of video\'s toegevoegd.' : `Geen ${filter === 'images' ? 'foto\'s' : 'video\'s'} gevonden.`}</p>
+            <p>Voeg bestanden toe aan de <code>gallery/assets</code> map om ze hier te tonen.</p>
+          </div>
+        `;
+        return;
+      }
+
+      galleryGrid.innerHTML = filtered.map((item, index) => `
+        <div class="gallery-item" data-type="${item.type}" data-index="${index}">
+          ${item.type === 'video' 
+            ? `<video src="${item.src}" muted loop onmouseenter="this.play()" onmouseleave="this.pause()"></video>`
+            : `<img src="${item.src}" alt="${item.title}">`
+          }
+          <div class="overlay">
+            <h3>${item.title}</h3>
+            <p>${item.desc}</p>
+          </div>
+          <div class="actions">
+            <button class="action-btn" onclick="copyItem(${index})" title="Kopiëren">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </button>
+            <button class="action-btn" onclick="downloadItem(${index})" title="Downloaden">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // Add click handlers for modal
+      document.querySelectorAll('.gallery-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (!e.target.closest('.action-btn')) {
+            const index = parseInt(item.dataset.index);
+            openModal(index);
+          }
+        });
+      });
+    }
+
+    function openModal(index) {
+      const item = galleryItems[index];
+      modalMedia.innerHTML = item.type === 'video'
+        ? `<video src="${item.src}" controls autoplay></video>`
+        : `<img src="${item.src}" alt="${item.title}">`;
+      modalTitle.textContent = item.title;
+      modalDesc.textContent = item.desc;
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      modalMedia.innerHTML = '';
+    }
+
+    function copyItem(index) {
+      const item = galleryItems[index];
+      navigator.clipboard.writeText(window.location.origin + item.src)
+        .then(() => alert('Link gekopieerd naar klembord!'))
+        .catch(() => alert('Kon link niet kopiëren'));
+    }
+
+    function downloadItem(index) {
+      const item = galleryItems[index];
+      const a = document.createElement('a');
+      a.href = item.src;
+      a.download = item.title;
+      a.click();
+    }
+
+    // Filter buttons with view-switch styling
+    const filterButtons = filterSwitch.querySelectorAll('button');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => {
+          b.classList.remove('is-active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-pressed', 'true');
+        
+        // Update thumb position
+        const btnRect = btn.getBoundingClientRect();
+        const switchRect = filterSwitch.getBoundingClientRect();
+        const thumbLeft = btnRect.left - switchRect.left + 4;
+        filterThumb.style.transform = `translateX(${thumbLeft}px)`;
+        filterThumb.style.width = `${btnRect.width - 8}px`;
+        
+        renderGallery(btn.dataset.filter);
+      });
+    });
+
+    // Initialize thumb position
+    const activeFilterBtn = filterSwitch.querySelector('.is-active');
+    if (activeFilterBtn) {
+      const btnRect = activeFilterBtn.getBoundingClientRect();
+      const switchRect = filterSwitch.getBoundingClientRect();
+      const thumbLeft = btnRect.left - switchRect.left + 4;
+      filterThumb.style.transform = `translateX(${thumbLeft}px)`;
+      filterThumb.style.width = `${btnRect.width - 8}px`;
+    }
+
+    // Layout toggle
+    layoutToggle.addEventListener('click', () => {
+      currentLayout = (currentLayout % 4) + 1;
+      galleryGrid.className = `gallery-grid grid-${currentLayout}`;
+    });
+
+    // Modal close
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Topbar scroll effect
+    const topbar = document.getElementById('topbar');
+    if (topbar) {
+      let ticking = false;
+      function update() {
+        const y = window.scrollY || window.pageYOffset || 0;
+        topbar.classList.toggle('is-scrolled', y > 24);
+        ticking = false;
+      }
+      window.addEventListener('scroll', function () {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      }, { passive: true });
+      update();
+    }
+
+    // Initial render
+    renderGallery();
+  </script>
+</body>
+</html>

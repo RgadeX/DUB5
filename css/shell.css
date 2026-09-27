@@ -1,0 +1,159 @@
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Topbar */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 16px 20px;
+  transition: background var(--dur-hover) var(--ease-hover),
+              backdrop-filter var(--dur-hover) var(--ease-hover),
+              border-bottom var(--dur-hover) var(--ease-hover);
+}
+
+.topbar.scrolled {
+  background: rgba(6, 9, 28, 0.55);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-nav {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-link {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  transition: color var(--dur-hover) var(--ease-hover);
+  position: relative;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--ink);
+  outline: none;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid rgba(224, 242, 254, 0.8);
+  outline-offset: 3px;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-games);
+  transform: scaleX(0);
+  transition: transform var(--dur-hover) var(--ease-hover);
+}
+
+.nav-link:hover::after,
+.nav-link:focus::after {
+  transform: scaleX(1);
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 120px 20px 60px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: 8rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 4.5rem;
+  }
+}
+
+/* Section */
+.section {
+  padding: 60px 0;
+}
+
+.section-label {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-dim);
+  margin-bottom: 24px;
+}
+
+/* Card list */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-faint);
+  font-size: 0.83rem;
+  border-top: 1px solid var(--line);
+  margin-top: 60px;
+}
+
+/* View toggle button */
+.view-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--glass);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 12px 24px;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 600;
+  box-shadow: var(--glass-shadow);
+  transition: background var(--dur-hover) var(--ease-hover),
+              border-color var(--dur-hover) var(--ease-hover),
+              transform var(--dur-hover) var(--ease-hover);
+  z-index: 90;
+}
+
+.view-toggle:hover {
+  background: var(--glass-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+
+.view-toggle:focus-visible {
+  outline: 2px solid rgba(224, 242, 254, 0.8);
+  outline-offset: 3px;
+}
