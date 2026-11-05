@@ -832,17 +832,17 @@
          ========================================================= */
       .install-prompt {
         position: fixed;
-        right: 1.25rem;
-        bottom: 1.25rem;
+        right: 1.5rem;
+        bottom: 1.5rem;
         z-index: 90;
-        width: min(340px, calc(100vw - 2.5rem));
+        width: min(400px, calc(100vw - 3rem));
         border-radius: var(--card-radius, 18px);
         border: 1px solid var(--line);
         background: var(--glass);
         backdrop-filter: var(--glass-blur);
         -webkit-backdrop-filter: var(--glass-blur);
         box-shadow: var(--glass-inset), var(--glass-shadow);
-        padding: 1rem 1.1rem;
+        padding: 1.5rem 1.6rem 1.4rem;
         color: var(--ink);
         transform: translateY(140%);
         opacity: 0;
@@ -854,51 +854,73 @@
         opacity: 1;
         pointer-events: auto;
       }
+      .install-prompt-close {
+        position: absolute;
+        top: 0.7rem;
+        right: 0.7rem;
+        appearance: none;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--ink-dim);
+        border-radius: var(--r-pill, 999px);
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+        transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+      }
+      .install-prompt-close:hover { color: #fff; border-color: var(--line-strong); background: var(--glass-hover); }
       .install-prompt-title {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
         font-weight: 700;
         color: #fff;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.45rem;
+        padding-right: 2.25rem;
       }
       .install-prompt-text {
-        font-size: 0.82rem;
-        line-height: 1.5;
+        font-size: 0.88rem;
+        line-height: 1.55;
         color: var(--ink-dim);
-        margin-bottom: 0.85rem;
+        margin-bottom: 1rem;
       }
       .install-prompt-actions {
         display: flex;
         gap: 0.6rem;
         align-items: center;
       }
+      /* Same visual language as the homepage nav buttons:
+         glass surface, hairline border, soft inner highlight.
+         Dark DUB5 blue fill; hover only changes color, never moves. */
       .install-prompt-download {
         flex: 1;
         appearance: none;
-        border: none;
-        border-radius: var(--r-pill, 999px);
-        background: #4cc9f0;
-        color: #0b1150;
-        font-weight: 700;
-        font-size: 0.85rem;
-        padding: 0.6rem 1rem;
-        cursor: pointer;
-        transition: filter 200ms ease, transform 200ms ease;
-      }
-      .install-prompt-download:hover { filter: brightness(1.08); transform: translateY(-1px); }
-      .install-prompt-close {
-        appearance: none;
         border: 1px solid var(--line);
-        background: transparent;
-        color: var(--ink-dim);
         border-radius: var(--r-pill, 999px);
-        width: 34px;
-        height: 34px;
+        background: linear-gradient(160deg, #16204d 0%, #0b1150 55%, #070b33 100%);
+        box-shadow: var(--glass-inset), 0 6px 18px rgba(3, 6, 23, 0.45);
+        color: #cfe0ff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        padding: 0.75rem 1.25rem;
         cursor: pointer;
-        font-size: 1rem;
-        line-height: 1;
-        transition: color 200ms ease, border-color 200ms ease;
+        transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease, color 200ms ease, filter 200ms ease;
       }
-      .install-prompt-close:hover { color: #fff; border-color: var(--line-strong); }
+      .install-prompt-download:hover {
+        background: linear-gradient(160deg, #1d2a63 0%, #101a5e 55%, #0a0f3d 100%);
+        border-color: var(--line-strong);
+        color: #fff;
+        box-shadow: var(--glass-inset), 0 8px 22px rgba(3, 6, 23, 0.55), 0 0 18px rgba(76, 201, 240, 0.12);
+        filter: brightness(1.06);
+      }
+      .install-prompt-download:active { filter: brightness(0.95); }
+      .install-prompt-download:focus-visible {
+        outline: 2px solid rgba(76, 201, 240, 0.7);
+        outline-offset: 2px;
+      }
     </style>
   </head>
   <body data-layout="three-columns">
@@ -959,11 +981,11 @@
     </footer>
 
     <div class="install-prompt" id="installPrompt" role="dialog" aria-label="App installeren">
+      <button class="install-prompt-close" id="installPromptClose" type="button" aria-label="Sluiten">×</button>
       <div class="install-prompt-title">Download DUB5</div>
       <div class="install-prompt-text">Installeer de app om DUB5 offline te gebruiken — games, tools en alles werkt dan zonder internet.</div>
       <div class="install-prompt-actions">
         <button class="install-prompt-download" id="installPromptBtn" type="button">Downloaden</button>
-        <button class="install-prompt-close" id="installPromptClose" type="button" aria-label="Sluiten">×</button>
       </div>
     </div>
 
