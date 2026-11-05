@@ -370,8 +370,6 @@
 <script type="text/javascript" src="GameAnalytics.js"></script>
 </head>
 <body>
-  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
-
   <a class="back-link-fixed" href="/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5"/>
@@ -415,6 +413,10 @@
 
     <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
   </div>
+
+  <!-- Keep after the game canvas: engines that resolve input via
+       document.querySelector('canvas') must find #canvas first. -->
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
   <script id="engine-loader" type="text/javascript" src="dmloader.js"></script>
   <script id="engine-setup" type="text/javascript"></script>

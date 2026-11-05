@@ -172,8 +172,6 @@
 </style>
 </head>
 <body>
-  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
-
   <a class="back-link-fixed" href="/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5"/>
@@ -221,6 +219,11 @@
 
     <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
   </div>
+
+  <!-- Stars canvas must stay AFTER the game canvas: the engine resolves
+       mouse input via document.querySelector('canvas'), which returns the
+       first canvas in DOM order. -->
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
 <script type="text/javascript" src="webapp/poki-stub.js"></script>
 <script type="text/javascript" src="webapp/source_min.js" crossorigin="anonymous"></script>
