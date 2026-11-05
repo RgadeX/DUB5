@@ -1,7 +1,7 @@
 // Service Worker for DUB5 PWA
 // Update this version on each deployment to force cache refresh
 const CACHE_VERSION = '1.0.0';
-const CACHE_BUILD = '001'; // Increment this on each build
+const CACHE_BUILD = '002'; // Increment this on each build
 const CACHE_NAME = `dub5-v${CACHE_VERSION}.${CACHE_BUILD}`;
 const APP_SHELL = [
   '/',
@@ -25,7 +25,26 @@ const APP_SHELL = [
   '/engine/rng.js',
   '/engine/hud.js',
   '/engine/game-host.js',
-  '/games/snake/index.js',
+  // Game pages (pretty URLs served by routes)
+  '/snake',
+  '/minesweeper',
+  '/blockblast',
+  '/rekenmachine',
+  '/2048',
+  '/tetris',
+  '/memory',
+  '/flappy',
+  '/pong',
+  '/sudoku',
+  '/gnomelauncher',
+  '/breakout',
+  '/baseball',
+  // Shared game assets
+  '/showcase/showcase.css',
+  '/showcase/showcase.js',
+  '/games/memory/starfield.js',
+  '/games/rekenmachine/starfield.js',
+  '/games/sudoku/starfield.js',
   '/offline.html'
 ];
 

@@ -2417,5 +2417,14 @@ if (topbar) {
   update();
 }
 </script>
+
+<script>
+// Register the site service worker so this game works offline
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>

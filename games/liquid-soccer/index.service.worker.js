@@ -82,7 +82,14 @@ self.addEventListener("fetch", (event) => {
 					}
 				}
 			}
-			const cached = await cache.match(event.request);
+			let cached = await cache.match(event.request);
+			if (!cached && event.request.mode === "navigate") {
+				// Page may be served at a clean URL (e.g. /liquid-soccer) while
+				// the cache stores /liquid-soccer/index.html
+				const navUrl = new URL(event.request.url);
+				const indexUrl = navUrl.origin + navUrl.pathname.replace(/\/?$/, "/index.html");
+				cached = await cache.match(indexUrl);
+			}
 			if (cached) {
 				return cached;
 			} else {

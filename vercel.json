@@ -149,6 +149,14 @@
       "dest": "/gallery/index.html"
     },
     {
+      "src": "/liquid-soccer",
+      "dest": "/games/liquid-soccer/index.html"
+    },
+    {
+      "src": "/liquid-soccer/(.*)",
+      "dest": "/games/liquid-soccer/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
