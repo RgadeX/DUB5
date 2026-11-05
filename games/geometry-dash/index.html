@@ -28,8 +28,10 @@
   .game-stage {
     position: relative;
     flex: 1;
-    min-height: 420px;
-    height: calc(100vh - 260px);
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
     border-radius: 12px;
     overflow: hidden;
     background: rgba(2, 4, 16, 0.72);
@@ -45,7 +47,6 @@
   }
   @media (max-width: 640px) {
     .page { padding: 4.5rem 0.75rem 0.75rem; }
-    .game-stage { height: calc(100vh - 300px); min-height: 360px; }
   }
 </style>
 </head>
