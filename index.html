@@ -856,23 +856,19 @@
       }
       .install-prompt-close {
         position: absolute;
-        top: 0.7rem;
-        right: 0.7rem;
+        top: 0.85rem;
+        right: 0.9rem;
         appearance: none;
-        border: 1px solid var(--line);
-        background: transparent;
+        border: none;
+        background: none;
         color: var(--ink-dim);
-        border-radius: var(--r-pill, 999px);
-        width: 30px;
-        height: 30px;
         cursor: pointer;
-        font-size: 1rem;
+        font-size: 1.15rem;
         line-height: 1;
-        display: grid;
-        place-items: center;
-        transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+        padding: 0.15rem 0.3rem;
+        transition: color 200ms ease;
       }
-      .install-prompt-close:hover { color: #fff; border-color: var(--line-strong); background: var(--glass-hover); }
+      .install-prompt-close:hover { color: #fff; }
       .install-prompt-title {
         font-size: 1.05rem;
         font-weight: 700;
@@ -893,8 +889,11 @@
       }
       /* Same visual language as the homepage nav buttons:
          glass surface, hairline border, soft inner highlight.
-         Dark DUB5 blue fill; hover only changes color, never moves. */
+         Dark DUB5 blue fill. Hover shows the same cursor-following
+         glow as .nav-button — no color/transform change. */
       .install-prompt-download {
+        position: relative;
+        overflow: hidden;
         flex: 1;
         appearance: none;
         border: 1px solid var(--line);
@@ -907,16 +906,16 @@
         letter-spacing: 0.02em;
         padding: 0.75rem 1.25rem;
         cursor: pointer;
-        transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease, color 200ms ease, filter 200ms ease;
       }
-      .install-prompt-download:hover {
-        background: linear-gradient(160deg, #1d2a63 0%, #101a5e 55%, #0a0f3d 100%);
-        border-color: var(--line-strong);
-        color: #fff;
-        box-shadow: var(--glass-inset), 0 8px 22px rgba(3, 6, 23, 0.55), 0 0 18px rgba(76, 201, 240, 0.12);
-        filter: brightness(1.06);
+      .install-prompt-download-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 250ms ease;
+        pointer-events: none;
       }
-      .install-prompt-download:active { filter: brightness(0.95); }
+      .install-prompt-download:hover .install-prompt-download-glow { opacity: 1; }
       .install-prompt-download:focus-visible {
         outline: 2px solid rgba(76, 201, 240, 0.7);
         outline-offset: 2px;
@@ -985,7 +984,7 @@
       <div class="install-prompt-title">Download DUB5</div>
       <div class="install-prompt-text">Installeer de app om DUB5 offline te gebruiken — games, tools en alles werkt dan zonder internet.</div>
       <div class="install-prompt-actions">
-        <button class="install-prompt-download" id="installPromptBtn" type="button">Downloaden</button>
+        <button class="install-prompt-download" id="installPromptBtn" type="button"><span class="install-prompt-download-glow"></span>Downloaden</button>
       </div>
     </div>
 
@@ -1703,15 +1702,30 @@
         if (!prompt || !btn || !close) return;
 
         let deferredPrompt = null;
-        const DISMISS_KEY = 'dub5-install-dismissed';
 
         function show() {
-          if (localStorage.getItem(DISMISS_KEY)) return;
+          // Show on every page load — only a successful install (or the
+          // standalone display mode) keeps it hidden.
           if (window.matchMedia('(display-mode: standalone)').matches) return;
           prompt.classList.add('is-visible');
         }
         function hide() {
           prompt.classList.remove('is-visible');
+        }
+
+        // Cursor-following glow, same effect as the homepage nav buttons
+        const glow = btn.querySelector('.install-prompt-download-glow');
+        if (glow) {
+          btn.addEventListener('mousemove', function (e) {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            glow.style.background =
+              'radial-gradient(circle at ' + x + 'px ' + y + 'px, rgba(255,255,255,0.16) 0%, transparent 60%)';
+          });
+          btn.addEventListener('mouseleave', function () {
+            glow.style.background = '';
+          });
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -1732,10 +1746,8 @@
           }
         });
 
-        close.addEventListener('click', () => {
-          localStorage.setItem(DISMISS_KEY, '1');
-          hide();
-        });
+        // Closing only hides it for this page view — it returns on next load
+        close.addEventListener('click', hide);
 
         window.addEventListener('appinstalled', hide);
       })();
