@@ -1,47 +1,193 @@
 <!DOCTYPE html>
-<html lang="en-us">
-
+<html lang="nl">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Stacktris � Unblocked Games GPlus</title>
-	<meta name="website" content="https://unblocked-gamesgplus.com/" />
-	<meta name="description" content="Unblocked Games GPlus" />
-	<meta name="google" content="notranslate">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<link rel="stylesheet" href="webapp/fancade.css">
-	<link rel="icon" href="webapp/favicon.ico">
-	<script src="patch/poki-sdk.js"></script>
-<meta name="robots" content="noindex, nofollow" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Stacktris - DUB5</title>
+<meta name="theme-color" content="#0b1150" />
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../showcase/showcase.css">
+<style>
+  .page {
+    padding: 1.5rem 1.5rem 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .page-header { margin-bottom: 0.5rem; }
+  .page-title { font-size: 3rem; }
+  .page-subline { font-size: 0.85rem; }
+  .header-rule { margin-top: 0.5rem; }
+
+  .game-shell {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    border-radius: var(--r-panel);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    padding: 0.75rem;
+  }
+
+  .game-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  #canvas_border {
+    position: absolute;
+    inset: 0;
+  }
+
+  #canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    background: #000;
+  }
+
+  /* Loading overlay */
+  #play_content {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: #fff;
+    font-family: 'DM Serif Display', serif;
+    text-align: center;
+    padding: 1rem;
+    background: radial-gradient(120% 100% at 50% 0%, #0b1150 0%, #050833 55%, #01030f 100%);
+  }
+
+  #play_content .cover {
+    width: 96px;
+    height: 96px;
+    border-radius: 18px;
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+  }
+
+  #play_content .game-name {
+    font-size: 2rem;
+    color: #fff;
+  }
+
+  #play_content .game-author {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+  }
+
+  #progress_or_play { width: min(280px, 70%); }
+  #progress {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.08);
+    accent-color: #4cc9f0;
+  }
+
+  #gradient { display: none; }
+  #webview_content { display: none; }
+
+  /* Modal (required by engine, kept hidden) */
+  #modal_parent { display: none; }
+
+  .page-footer {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--ink-dim);
+    text-align: center;
+    opacity: 0;
+    animation: fade-in 700ms ease-out 620ms forwards;
+  }
+
+  @media (max-width: 768px) {
+    .page { padding: 1rem 1rem 0.75rem; }
+    .page-title { font-size: 2rem; }
+    .game-shell { padding: 0.6rem; }
+  }
+</style>
 </head>
+<body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
-<body id="body">
-	<div id="modal_parent">
-		<div id="modal_content"><span id="modal_close_button">&times;</span>
-			<div id="store_link_modal_content" class="modal_inner"></div>
-			<div id="share_file_modal_content" class="modal_inner"></div>
-		</div>
-	</div>
-	<div id="canvas_border" class="emscripten_border">
-		<div id="play_content" class="middle center">
-			<div class="edge">
-				<div class="box">
-					<div class="black"><img src="webapp/cover.jpg" class="cover">
-						<p class="title">Stacktris</p>
-						<p class="author">Fancade</p>
-					</div>
-				</div>
-			</div>
-			<div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div>
-			<p class="description"></p>
-		</div><canvas class="emscripten" id="canvas" tabindex="-1"></canvas>
-		<div id="gradient"></div>
-		<div id="webview_content"></div>
-	</div>
-	<script type="text/javascript" src="webapp/source_min.js" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="webapp/index.js" crossorigin="anonymous"></script>
+  <a class="back-link-fixed" href="/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"/>
+      <path d="m12 19-7-7 7-7"/>
+    </svg>
+    Terug
+  </a>
+
+  <div class="page">
+    <header class="page-header">
+      <h1 class="page-title">Stacktris</h1>
+      <p class="page-subline">Stapel blokken en houd het bord opgeruimd.</p>
+    </header>
+
+    <div class="header-rule" aria-hidden="true"></div>
+
+    <div class="game-shell">
+      <div class="game-stage" id="game-stage">
+        <div id="modal_parent">
+          <div id="modal_content"><span id="modal_close_button">&times;</span>
+            <div id="store_link_modal_content" class="modal_inner"></div>
+            <div id="share_file_modal_content" class="modal_inner"></div>
+          </div>
+        </div>
+        <div id="canvas_border" class="emscripten_border">
+          <div id="play_content" class="middle center">
+            <img src="webapp/cover.jpg" class="cover" alt="Stacktris">
+            <p class="game-name">Stacktris</p>
+            <p class="game-author">Fancade</p>
+            <div id="progress_or_play"><progress id="progress" class="loading" value="0" max="100"></progress></div>
+          </div>
+          <canvas class="emscripten" id="canvas" tabindex="-1"></canvas>
+          <div id="gradient"></div>
+          <div id="webview_content"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
+  </div>
+
+<script type="text/javascript" src="webapp/poki-stub.js"></script>
+<script type="text/javascript" src="webapp/source_min.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="webapp/index.js" crossorigin="anonymous"></script>
+<script>
+// Keep canvas sized to the stage when the window resizes
+window.addEventListener('load', () => {
+  const stage = document.getElementById('game-stage');
+  if (stage && 'ResizeObserver' in window) {
+    new ResizeObserver(() => window.dispatchEvent(new Event('resize'))).observe(stage);
+  }
+});
+// Register the site service worker so this game works offline
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
-
 </html>
-
-

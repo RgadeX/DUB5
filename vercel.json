@@ -149,6 +149,14 @@
       "dest": "/gallery/index.html"
     },
     {
+      "src": "/stacktris",
+      "dest": "/games/stacktris/index.html"
+    },
+    {
+      "src": "/stacktris/(.*)",
+      "dest": "/games/stacktris/$1"
+    },
+    {
       "src": "/liquid-soccer",
       "dest": "/games/liquid-soccer/index.html"
     },

@@ -99,9 +99,6 @@ app.get('/sudoku', (req, res) => {
   res.sendFile(path.join(__dirname, 'games', 'sudoku', 'index.html'));
 });
 
-// Serve static assets for liquid-soccer (must be before the route)
-app.use('/liquid-soccer', express.static(path.join(__dirname, 'games', 'liquid-soccer')));
-
 app.get('/gnomelauncher', (req, res) => {
   res.sendFile(path.join(__dirname, 'games', 'gnomelauncher', 'index.html'));
 });
@@ -117,6 +114,16 @@ app.get('/baseball', (req, res) => {
 app.get('/liquid-soccer', (req, res) => {
   res.sendFile(path.join(__dirname, 'games', 'liquid-soccer', 'index.html'));
 });
+
+// Serve static assets for liquid-soccer
+app.use('/liquid-soccer', express.static(path.join(__dirname, 'games', 'liquid-soccer')));
+
+app.get('/stacktris', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'stacktris', 'index.html'));
+});
+
+// Serve static assets for stacktris
+app.use('/stacktris', express.static(path.join(__dirname, 'games', 'stacktris')));
 
 app.get('/cijferkaart', (req, res) => {
   res.sendFile(path.join(__dirname, 'cijferkaart', 'index.html'));
