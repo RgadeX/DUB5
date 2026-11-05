@@ -1,7 +1,7 @@
 // Service Worker for DUB5 PWA
 // Update this version on each deployment to force cache refresh
 const CACHE_VERSION = '1.0.0';
-const CACHE_BUILD = '011'; // Increment this on each build
+const CACHE_BUILD = '012'; // Increment this on each build
 const CACHE_NAME = `dub5-v${CACHE_VERSION}.${CACHE_BUILD}`;
 const APP_SHELL = [
   '/',
@@ -67,6 +67,9 @@ const APP_SHELL = [
   '/block-blast/archive/game0.arcd',
   '/block-blast/archive/game0.dmanifest',
   '/block-blast/archive/game0.public.der',
+  '/subway-surfers',
+  '/subway-surfers/poki-stub.js',
+  '/geometry-dash',
   '/offline.html'
 ];
 
@@ -194,6 +197,42 @@ self.addEventListener('fetch', (event) => {
 
   // Block Blast game assets - cache on first play
   if (url.pathname.startsWith('/block-blast/')) {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) {
+          fetch(request).then((freshResponse) => {
+            if (freshResponse.ok) {
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, freshResponse);
+              });
+            }
+          });
+          return response;
+        }
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        }).catch(() => {
+          return caches.match('/offline.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // Geometry Dash payload (hundreds of MB) is cached by the game's own
+  // CacheStorage layer - don't intercept those requests here.
+  if (url.pathname.startsWith('/geometry-dash/') && url.pathname !== '/geometry-dash/') {
+    return;
+  }
+
+  // Subway Surfers game assets - cache on first play
+  if (url.pathname.startsWith('/subway-surfers/')) {
     event.respondWith(
       caches.match(request).then((response) => {
         if (response) {

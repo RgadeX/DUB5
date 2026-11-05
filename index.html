@@ -1202,6 +1202,8 @@
         { title: 'Snake', desc: 'Klassiek slangen-spel, vlotte besturing.', href: '/snake', cat: 'games', icon: 'snake', badge: 'Nieuw', external: false },
         { title: 'Block Blast', desc: 'Blokken plaatsen en lijnen volmaken.', href: '/blockblast', cat: 'games', icon: 'blocks', external: false },
         { title: 'Block Blast Pro', desc: 'Het originele Block Blast spel.', href: '/block-blast', cat: 'games', icon: 'blocks', badge: 'Nieuw', external: false },
+        { title: 'Subway Surfers', desc: 'Ren, spring en pak coins in de metro.', href: '/subway-surfers', cat: 'games', icon: 'bolt', badge: 'Nieuw', external: false },
+        { title: 'Geometry Dash', desc: 'De volledige game — eenmalig ~300 MB downloaden.', href: '/geometry-dash', cat: 'games', icon: 'gamepad', badge: 'Nieuw', external: false },
         { title: 'Rekenmachine Spelletjes', desc: 'Spelletjes spelen op je rekenmachine.', href: '/rekenmachine', cat: 'games', icon: 'calc', badge: 'Nieuw', external: false },
         { title: '2048', desc: 'Schuif tegels samen en haal 2048.', href: '/2048', cat: 'games', icon: 'merge', external: false },
         { title: 'Tetris', desc: 'Blokken laten vallen, rijen volmaken.', href: '/tetris', cat: 'games', icon: 'tetris', external: false },
@@ -1224,7 +1226,7 @@
         { title: 'Showcase', desc: 'Demonstratie van tekst- en display-types.', href: '/showcase', cat: 'tools', icon: 'star', badge: 'NEW', external: false },
 
         /* ---------------- GALLERY ---------------- */
-        { title: 'Galerij & Herinneringen', desc: 'Funny moments, video\'s en foto\'s.', href: '/gallery', cat: 'gallery', icon: 'gallery', badge: 'Nieuw', external: false }
+        { title: 'Galerij & Herinneringen', desc: 'Funny moments, video\'s en foto\'s.', href: '/gallery', cat: 'gallery', icon: 'gallery', badge: 'Nieuw', external: false, localOnly: true }
       ];
 
       /* =========================================================
@@ -1251,16 +1253,24 @@
           '</a>';
       }
 
+      // Items flagged localOnly (e.g. gallery) only render on localhost —
+      // they are excluded from the Vercel deployment.
+      const IS_LOCAL_HOST = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+      const VISIBLE_ITEMS = ITEMS.filter(function (item) { return !item.localOnly || IS_LOCAL_HOST; });
+      if (!IS_LOCAL_HOST) {
+        document.querySelectorAll('a[data-nav="gallery"]').forEach(function (a) { a.remove(); });
+      }
+
       function render(view) {
         currentView = view;
 
         if (view === 'all') {
           content.innerHTML = '<div class="nav-grid">' +
-            ITEMS.map(function (item, i) { return cardHTML(item, i); }).join('') +
+            VISIBLE_ITEMS.map(function (item, i) { return cardHTML(item, i); }).join('') +
             '</div>';
         } else {
           content.innerHTML = CATEGORIES.map(function (cat) {
-            const items = ITEMS.filter(function (item) { return item.cat === cat.id; });
+            const items = VISIBLE_ITEMS.filter(function (item) { return item.cat === cat.id; });
             if (!items.length) return '';
             return '<section class="cat-section" data-cat="' + cat.id + '" id="' + cat.id + '">' +
               '<div class="section-head">' +

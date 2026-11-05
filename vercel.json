@@ -145,10 +145,6 @@
       "dest": "/problemen/index.html"
     },
     {
-      "src": "/gallery",
-      "dest": "/gallery/index.html"
-    },
-    {
       "src": "/stacktris",
       "dest": "/games/stacktris/index.html"
     },
@@ -171,6 +167,26 @@
     {
       "src": "/block-blast/(.*)",
       "dest": "/games/blockblast-pro/$1"
+    },
+    {
+      "src": "/subway-surfers",
+      "dest": "/games/subway-surfers/index.html"
+    },
+    {
+      "src": "/subway-surfers/(.*)",
+      "dest": "/games/subway-surfers/$1"
+    },
+    {
+      "src": "/geometry-dash",
+      "dest": "/games/geometry-dash/index.html"
+    },
+    {
+      "src": "/geometry-dash/(.*)",
+      "dest": "/games/geometry-dash/$1"
+    },
+    {
+      "src": "/fonts/(.*)",
+      "dest": "/games/geometry-dash/fonts/$1"
     },
     {
       "src": "/(.*)",

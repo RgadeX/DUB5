@@ -4,3 +4,6 @@ term-learner-main/
 stellar-term-learner/
 light-learning-platform/
 light-learning-platform-standalone/
+
+# Gallery — local only, not deployed
+gallery/

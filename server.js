@@ -132,6 +132,23 @@ app.get('/block-blast', (req, res) => {
 // Serve static assets for block-blast (Defold game files)
 app.use('/block-blast', express.static(path.join(__dirname, 'games', 'blockblast-pro')));
 
+app.get('/subway-surfers', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'subway-surfers', 'index.html'));
+});
+
+// Serve static assets for subway-surfers (mirrored web build)
+app.use('/subway-surfers', express.static(path.join(__dirname, 'games', 'subway-surfers')));
+
+app.get('/geometry-dash', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'geometry-dash', 'index.html'));
+});
+
+// Serve static assets for geometry-dash (full WASM port + payload)
+app.use('/geometry-dash', express.static(path.join(__dirname, 'games', 'geometry-dash')));
+
+// The GD port requests its fonts from the site root
+app.use('/fonts', express.static(path.join(__dirname, 'games', 'geometry-dash', 'fonts')));
+
 app.get('/cijferkaart', (req, res) => {
   res.sendFile(path.join(__dirname, 'cijferkaart', 'index.html'));
 });

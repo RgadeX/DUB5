@@ -46,3 +46,6 @@ fix_script4.js
 fix_script5.js
 update_pages.js
 UPDATE_SUMMARY.md
+# Large game payloads (too big for git; served locally / deployed separately)
+games/geometry-dash/payload/
+games/geometry-dash-tmp/
