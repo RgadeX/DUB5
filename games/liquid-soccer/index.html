@@ -689,6 +689,7 @@
 					setStatusMode('hidden');
 					initializing = false;
 					console.log('Liquid Soccer: Game loaded successfully!');
+					syncCanvasResolution();
 				}, displayFailureNotice);
 			}
 		}
@@ -702,6 +703,23 @@
 		const fullscreenBtn = document.getElementById('fullscreenBtn');
 		const gameStage = document.getElementById('gameStage');
 		const canvasElement = document.getElementById('canvas');
+
+		function syncCanvasResolution() {
+			if (!canvasElement) return;
+			const rect = gameStage.getBoundingClientRect();
+			const dpr = window.devicePixelRatio || 1;
+			canvasElement.width = Math.round(rect.width * dpr);
+			canvasElement.height = Math.round(rect.height * dpr);
+		}
+
+		window.addEventListener('resize', () => {
+			if (!document.fullscreenElement) {
+				syncCanvasResolution();
+			}
+		});
+		window.addEventListener('orientationchange', () => {
+			setTimeout(syncCanvasResolution, 100);
+		});
 
 		fullscreenBtn.addEventListener('click', () => {
 			if (!document.fullscreenElement) {
