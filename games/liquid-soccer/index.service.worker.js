@@ -3,14 +3,27 @@
 // that they need an Internet connection to run the project if desired.
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
-const CACHE_VERSION = "1678254997|92072667890";
+const CACHE_VERSION = "20261105-offline-pwa";
 const CACHE_PREFIX = "SuperLiquidSocce-sw-cache-";
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 const OFFLINE_URL = "index.offline.html";
 // Files that will be cached on load.
-const CACHED_FILES = ["index.html","index.js","index.offline.html","index.icon.png","index.apple-touch-icon.png"];
+const CACHED_FILES = [
+	"index.html",
+	"index.js",
+	"index.offline.html",
+	"index.manifest.json",
+	"index.wasm",
+	"index.pck",
+	"index.icon.png",
+	"index.apple-touch-icon.png",
+	"index.144x144.png",
+	"index.180x180.png",
+	"index.192x192.png",
+	"index.512x512.png"
+];
 // Files that we might not want the user to preload, and will only be cached on first load.
-const CACHABLE_FILES = ["index.wasm","index.pck"];
+const CACHABLE_FILES = [];
 const FULL_CACHE = CACHED_FILES.concat(CACHABLE_FILES);
 
 self.addEventListener("install", (event) => {
