@@ -29,4 +29,6 @@
     setEnabledManualSessionHandling: noop,
     setEnabledVerboseLog: noop
   };
+  // The Defold build references the lowercase `gameanalytics` namespace.
+  window.gameanalytics = { GameAnalytics: window.GameAnalytics };
 })();
