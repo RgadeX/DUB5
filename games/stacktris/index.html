@@ -109,6 +109,49 @@
   #gradient { display: none; }
   #webview_content { display: none; }
 
+  /* Never block pointer input to the game canvas */
+  #play_content,
+  #gradient,
+  #webview_content,
+  #modal_parent {
+    pointer-events: none;
+  }
+
+  .game-shell-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .fullscreen-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: rgba(9, 13, 38, 0.72);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--ink-dim);
+    transition: all 200ms ease;
+    padding: 0;
+    font: inherit;
+  }
+
+  .fullscreen-btn:hover {
+    color: #fff;
+    border-color: var(--line-strong);
+    background: var(--glass-hover);
+  }
+
+  .fullscreen-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
   /* Modal (required by engine, kept hidden) */
   #modal_parent { display: none; }
 
@@ -148,6 +191,13 @@
     <div class="header-rule" aria-hidden="true"></div>
 
     <div class="game-shell">
+      <div class="game-shell-header">
+        <button class="fullscreen-btn" id="fullscreenBtn" type="button" aria-label="Volledig scherm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
       <div class="game-stage" id="game-stage">
         <div id="modal_parent">
           <div id="modal_content"><span id="modal_close_button">&times;</span>
@@ -176,6 +226,18 @@
 <script type="text/javascript" src="webapp/source_min.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="webapp/index.js" crossorigin="anonymous"></script>
 <script>
+// Fullscreen toggle (same behavior as snake page)
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+if (fullscreenBtn) {
+  fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+    } else {
+      document.exitFullscreen();
+    }
+  });
+}
+
 // Keep canvas sized to the stage when the window resizes
 window.addEventListener('load', () => {
   const stage = document.getElementById('game-stage');
