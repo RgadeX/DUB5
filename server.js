@@ -5,6 +5,21 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 5093;
 
+// Block learning-related folders that are kept locally but not served
+const BLOCKED_PATHS = [
+  '/term-learner',
+  '/term-learner-main',
+  '/stellar-term-learner',
+  '/light-learning-platform',
+  '/light-learning-platform-standalone'
+];
+app.use((req, res, next) => {
+  if (BLOCKED_PATHS.some((p) => req.path === p || req.path.startsWith(p + '/'))) {
+    return res.status(404).send('Not found');
+  }
+  next();
+});
+
 // Serve static files from root
 app.use(express.static(__dirname));
 
@@ -141,28 +156,8 @@ app.get('/biologie', (req, res) => {
   res.sendFile(path.join(__dirname, 'biologie', 'index.html'));
 });
 
-app.get('/study-tools', (req, res) => {
-  res.sendFile(path.join(__dirname, 'study-tools', 'index.html'));
-});
-
-app.get('/leerplatform', (req, res) => {
-  res.sendFile(path.join(__dirname, 'leerplatform', 'index.html'));
-});
-
 app.get('/woordenlijst', (req, res) => {
   res.sendFile(path.join(__dirname, 'woordenlijst', 'index.html'));
-});
-
-app.get('/flashcards', (req, res) => {
-  res.sendFile(path.join(__dirname, 'flashcards', 'index.html'));
-});
-
-app.get('/oefentoetsen', (req, res) => {
-  res.sendFile(path.join(__dirname, 'oefentoetsen', 'index.html'));
-});
-
-app.get('/samenvattingen', (req, res) => {
-  res.sendFile(path.join(__dirname, 'samenvattingen', 'index.html'));
 });
 
 // Hacks routes

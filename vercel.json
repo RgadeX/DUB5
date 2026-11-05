@@ -93,28 +93,8 @@
       "dest": "/biologie/index.html"
     },
     {
-      "src": "/study-tools",
-      "dest": "/study-tools/index.html"
-    },
-    {
-      "src": "/leerplatform",
-      "dest": "/leerplatform/index.html"
-    },
-    {
       "src": "/woordenlijst",
       "dest": "/woordenlijst/index.html"
-    },
-    {
-      "src": "/flashcards",
-      "dest": "/flashcards/index.html"
-    },
-    {
-      "src": "/oefentoetsen",
-      "dest": "/oefentoetsen/index.html"
-    },
-    {
-      "src": "/samenvattingen",
-      "dest": "/samenvattingen/index.html"
     },
     {
       "src": "/blooket-hacks",
