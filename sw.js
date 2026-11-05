@@ -1,7 +1,7 @@
 // Service Worker for DUB5 PWA
 // Update this version on each deployment to force cache refresh
 const CACHE_VERSION = '1.0.0';
-const CACHE_BUILD = '016'; // Increment this on each build
+const CACHE_BUILD = '017'; // Increment this on each build
 const CACHE_NAME = `dub5-v${CACHE_VERSION}.${CACHE_BUILD}`;
 const APP_SHELL = [
   '/',
@@ -225,11 +225,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Geometry Dash payload (hundreds of MB) is cached by the game's own
-  // CacheStorage layer - don't intercept those requests here.
-  if (url.pathname.startsWith('/geometry-dash/') && url.pathname !== '/geometry-dash/') {
+  // Geometry Dash payload chunks (hundreds of MB) are cached by the game's
+  // own CacheStorage layer - don't intercept those. Everything else under
+  // /geometry-dash/ (page, engine, manifest) is cached on first play.
+  if (url.pathname.startsWith('/geometry-dash/payload/')) {
     return;
   }
+  if (url.pathname.startsWith('/geometry-dash/')) {
 
   // Subway Surfers game assets - cache on first play
   if (url.pathname.startsWith('/subway-surfers/')) {
