@@ -165,6 +165,14 @@
       "dest": "/games/liquid-soccer/$1"
     },
     {
+      "src": "/block-blast",
+      "dest": "/games/blockblast-pro/index.html"
+    },
+    {
+      "src": "/block-blast/(.*)",
+      "dest": "/games/blockblast-pro/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }

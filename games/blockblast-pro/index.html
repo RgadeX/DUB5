@@ -1,12 +1,18 @@
-<!doctype html>
-<html lang="en">
- <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui, shrink-to-fit=no">
-  <meta name="apple-mobile-web-app-capable" content="yes"> <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>blocky-puzzle 1.0</title>
-  <style type="text/css">
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<base href="/block-blast/">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Block Blast - DUB5</title>
+<meta name="theme-color" content="#0b1150" />
+<link rel="icon" type="image/png" href="game_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../showcase/showcase.css">
+<style>
+
 	/* Disable user selection to avoid strange bug in Chrome on Windows:
 	* Selecting a text outside the canvas, then clicking+draging would
 	* drag the selected text but block mouse down/up events to the engine.
@@ -265,27 +271,151 @@
 	.canvas-app-container {
 		background: #52AAEC;
 	}
-	</style>
-  <script src="//game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
-  <script type="text/javascript" src="GameAnalytics.js"></script>
- </head>
- <body>
-  <div id="app-container" class="canvas-app-container">
-   <div id="running-from-file-warning" style="display: none; margin: 3em;">
-    <h1>Running from local file ⚠️</h1>
-    <p>It seems like you have opened this file by double-clicking on it. In order to test your build in a browser <b>you need to load this file from a web server</b>. You can either upload this file and the rest of the files from a Defold HTML5 bundle to a web hosting service OR host them using a local web server on your home network.</p>
-    <p><a href="https://defold.com/manuals/html5/#testing-html5-build" target="_blank">Learn more about running a local web server in the Defold HTML5 manual</a>.</p>
-   </div>
-   <div id="webgl-not-supported" style="display: none; margin: 3em;">
-    <h1>WebGL not supported ⚠️</h1>
-    <p>WebGL is not supported by your browser - visit <a href="https://get.webgl.org/">https://get.webgl.org/</a> to learn more.</p>
-   </div>
-   <div id="canvas-container" class="canvas-app-canvas-container">
-    <canvas id="canvas" class="canvas-app-canvas" tabindex="1" width="590" height="960"></canvas>
-   </div>
-   <div class="buttons-background">
-   </div>
-  </div> <!-- -->
+	
+  /* ===== DUB5 shell overrides ===== */
+  html, body { height: auto; overflow-x: hidden; }
+  body {
+    position: relative !important;
+    margin: 0;
+    background: radial-gradient(140% 100% at 50% -10%, #0b1150 0%, #050833 42%, #01030f 100%) !important;
+    background-attachment: fixed;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -15%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(42% 34% at 16% 10%, rgba(70, 110, 255, 0.20), transparent 68%),
+      radial-gradient(38% 30% at 86% 16%, rgba(150, 80, 255, 0.15), transparent 66%),
+      radial-gradient(58% 42% at 52% 108%, rgba(0, 130, 230, 0.18), transparent 72%);
+    filter: blur(26px);
+  }
+  .page {
+    padding: 1.5rem 1.5rem 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .page-header { margin-bottom: 0.5rem; }
+  .page-title { font-size: 3rem; }
+  .page-subline { font-size: 0.85rem; }
+  .header-rule { margin-top: 0.5rem; }
+  .game-shell {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+    border-radius: var(--r-panel);
+    border: 1px solid var(--line);
+    background: var(--glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset), var(--glass-shadow);
+    padding: 0.75rem;
+  }
+  .game-shell-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+  }
+  .fullscreen-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--line);
+    background: rgba(9, 13, 38, 0.72);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset);
+    display: grid; place-items: center;
+    cursor: pointer; color: var(--ink-dim);
+    transition: all 200ms ease; padding: 0; font: inherit;
+  }
+  .fullscreen-btn:hover { color: #fff; border-color: var(--line-strong); background: var(--glass-hover); }
+  .fullscreen-btn svg { width: 16px; height: 16px; }
+  .game-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 590 / 960;
+    max-height: 78vh;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .canvas-app-container {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    background: #000 !important;
+  }
+  .canvas-app-canvas-container { position: absolute; inset: 0; }
+  #canvas { width: 100% !important; height: 100% !important; }
+  .buttons-background { display: none; }
+  .loading-screen-container { background: rgba(1, 3, 15, 0.85); }
+  .page-footer {
+    margin-top: 0.75rem; font-size: 0.75rem; color: var(--ink-dim);
+    text-align: center; opacity: 0; animation: fade-in 700ms ease-out 620ms forwards;
+  }
+  @media (max-width: 768px) {
+    .page { padding: 1rem 1rem 0.75rem; }
+    .page-title { font-size: 2rem; }
+    .game-shell { padding: 0.6rem; }
+  }
+</style>
+<script type="text/javascript" src="poki-stub.js"></script>
+<script type="text/javascript" src="GameAnalytics.js"></script>
+</head>
+<body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+
+  <a class="back-link-fixed" href="/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"/>
+      <path d="m12 19-7-7 7-7"/>
+    </svg>
+    Terug
+  </a>
+
+  <div class="page">
+    <header class="page-header">
+      <h1 class="page-title">Block Blast</h1>
+      <p class="page-subline">Het origineel — blokken plaatsen en lijnen cleared maken.</p>
+    </header>
+
+    <div class="header-rule" aria-hidden="true"></div>
+
+    <div class="game-shell">
+      <div class="game-shell-header">
+        <button class="fullscreen-btn" id="fullscreenBtn" type="button" aria-label="Volledig scherm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+      <div class="game-stage" id="game-stage">
+        <div id="app-container" class="canvas-app-container">
+          <div id="running-from-file-warning" style="display: none; margin: 3em;">
+            <h1>Running from local file</h1>
+            <p>Open this page via a web server, not file://</p>
+          </div>
+          <div id="webgl-not-supported" style="display: none; margin: 3em;">
+            <h1>WebGL not supported</h1>
+            <p>WebGL is not supported by your browser.</p>
+          </div>
+          <div id="canvas-container" class="canvas-app-canvas-container">
+            <canvas id="canvas" class="canvas-app-canvas" tabindex="1" width="590" height="960"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
+  </div>
+
   <script id="engine-loader" type="text/javascript" src="dmloader.js"></script>
   <script id="engine-setup" type="text/javascript"></script>
   <script id="custom-progress-bar" type="text/javascript">
@@ -306,8 +436,6 @@
        				      </div>
        				    <div class="message" id="message"></div>
        				</div>
-				
-       				<img src="oplay_logo.png" class="logo-small" style="width: 100%; max-width: 160px; height: auto;">
     			</div>
 			`)
 
@@ -367,5 +495,24 @@
 			});
 		};
 	</script>
- </body>
+  <script>
+    // Fullscreen toggle (same behavior as snake page)
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+    }
+    // Register the site service worker so this game works offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
 </html>

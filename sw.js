@@ -1,7 +1,7 @@
 // Service Worker for DUB5 PWA
 // Update this version on each deployment to force cache refresh
 const CACHE_VERSION = '1.0.0';
-const CACHE_BUILD = '005'; // Increment this on each build
+const CACHE_BUILD = '006'; // Increment this on each build
 const CACHE_NAME = `dub5-v${CACHE_VERSION}.${CACHE_BUILD}`;
 const APP_SHELL = [
   '/',
@@ -53,6 +53,20 @@ const APP_SHELL = [
   '/stacktris/webapp/index.data',
   '/stacktris/webapp/index.wasm',
   '/stacktris/webapp/cover.jpg',
+  // Block Blast (original Defold build)
+  '/block-blast',
+  '/block-blast/dmloader.js',
+  '/block-blast/blockypuzzle_wasm.js',
+  '/block-blast/blockypuzzle.wasm',
+  '/block-blast/poki-stub.js',
+  '/block-blast/GameAnalytics.js',
+  '/block-blast/game_logo.png',
+  '/block-blast/archive/archive_files.json',
+  '/block-blast/archive/game0.projectc',
+  '/block-blast/archive/game0.arci',
+  '/block-blast/archive/game0.arcd',
+  '/block-blast/archive/game0.dmanifest',
+  '/block-blast/archive/game0.public.der',
   '/offline.html'
 ];
 
@@ -150,6 +164,36 @@ self.addEventListener('fetch', (event) => {
           return response;
         }).catch(() => {
           // If offline and game not cached, show offline page
+          return caches.match('/offline.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // Block Blast game assets - cache on first play
+  if (url.pathname.startsWith('/block-blast/')) {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) {
+          fetch(request).then((freshResponse) => {
+            if (freshResponse.ok) {
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, freshResponse);
+              });
+            }
+          });
+          return response;
+        }
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        }).catch(() => {
           return caches.match('/offline.html');
         });
       })

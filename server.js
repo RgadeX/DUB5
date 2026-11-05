@@ -125,6 +125,13 @@ app.get('/stacktris', (req, res) => {
 // Serve static assets for stacktris
 app.use('/stacktris', express.static(path.join(__dirname, 'games', 'stacktris')));
 
+app.get('/block-blast', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'blockblast-pro', 'index.html'));
+});
+
+// Serve static assets for block-blast (Defold game files)
+app.use('/block-blast', express.static(path.join(__dirname, 'games', 'blockblast-pro')));
+
 app.get('/cijferkaart', (req, res) => {
   res.sendFile(path.join(__dirname, 'cijferkaart', 'index.html'));
 });
