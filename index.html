@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DUB5</title>
     <meta name="description" content="DUB5 — games, tools en leermateriaal op één plek." />
+    <meta name="theme-color" content="#0b1150" />
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -822,6 +826,79 @@
         .nav-button-desc { display: none; }
         .nav-button { gap: 0.65rem; }
       }
+
+      /* =========================================================
+         INSTALL PROMPT (bottom-right)
+         ========================================================= */
+      .install-prompt {
+        position: fixed;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        z-index: 90;
+        width: min(340px, calc(100vw - 2.5rem));
+        border-radius: var(--card-radius, 18px);
+        border: 1px solid var(--line);
+        background: var(--glass);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--glass-inset), var(--glass-shadow);
+        padding: 1rem 1.1rem;
+        color: var(--ink);
+        transform: translateY(140%);
+        opacity: 0;
+        transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease;
+        pointer-events: none;
+      }
+      .install-prompt.is-visible {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .install-prompt-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.35rem;
+      }
+      .install-prompt-text {
+        font-size: 0.82rem;
+        line-height: 1.5;
+        color: var(--ink-dim);
+        margin-bottom: 0.85rem;
+      }
+      .install-prompt-actions {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+      }
+      .install-prompt-download {
+        flex: 1;
+        appearance: none;
+        border: none;
+        border-radius: var(--r-pill, 999px);
+        background: #4cc9f0;
+        color: #0b1150;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        transition: filter 200ms ease, transform 200ms ease;
+      }
+      .install-prompt-download:hover { filter: brightness(1.08); transform: translateY(-1px); }
+      .install-prompt-close {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--ink-dim);
+        border-radius: var(--r-pill, 999px);
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        transition: color 200ms ease, border-color 200ms ease;
+      }
+      .install-prompt-close:hover { color: #fff; border-color: var(--line-strong); }
     </style>
   </head>
   <body data-layout="three-columns">
@@ -880,6 +957,15 @@
     <footer class="footer">
       <p>© 2026 DUB5. Alle rechten voorbehouden.</p>
     </footer>
+
+    <div class="install-prompt" id="installPrompt" role="dialog" aria-label="App installeren">
+      <div class="install-prompt-title">Download DUB5</div>
+      <div class="install-prompt-text">Installeer de app om DUB5 offline te gebruiken — games, tools en alles werkt dan zonder internet.</div>
+      <div class="install-prompt-actions">
+        <button class="install-prompt-download" id="installPromptBtn" type="button">Downloaden</button>
+        <button class="install-prompt-close" id="installPromptClose" type="button" aria-label="Sluiten">×</button>
+      </div>
+    </div>
 
     <script>
       /* =========================================================
@@ -1583,5 +1669,53 @@
 
     </script>
     <script src="/js/sw-register.js" defer></script>
+    <script>
+      // =========================================================
+      // PWA INSTALL PROMPT (bottom-right)
+      // =========================================================
+      (function installPrompt() {
+        const prompt = document.getElementById('installPrompt');
+        const btn = document.getElementById('installPromptBtn');
+        const close = document.getElementById('installPromptClose');
+        if (!prompt || !btn || !close) return;
+
+        let deferredPrompt = null;
+        const DISMISS_KEY = 'dub5-install-dismissed';
+
+        function show() {
+          if (localStorage.getItem(DISMISS_KEY)) return;
+          if (window.matchMedia('(display-mode: standalone)').matches) return;
+          prompt.classList.add('is-visible');
+        }
+        function hide() {
+          prompt.classList.remove('is-visible');
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          // slight delay so it doesn't fight the page intro
+          setTimeout(show, 1200);
+        });
+
+        btn.addEventListener('click', async () => {
+          if (!deferredPrompt) return;
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          hide();
+          if (outcome === 'accepted') {
+            btn.textContent = 'Geïnstalleerd';
+          }
+        });
+
+        close.addEventListener('click', () => {
+          localStorage.setItem(DISMISS_KEY, '1');
+          hide();
+        });
+
+        window.addEventListener('appinstalled', hide);
+      })();
+    </script>
   </body>
 </html>
