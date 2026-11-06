@@ -195,6 +195,13 @@
       "dest": "/games/geometry-dash/index.html"
     },
     {
+      "src": "/geometry-dash/game.html",
+      "dest": "/games/geometry-dash/game.html",
+      "headers": {
+        "Content-Type": "text/html; charset=utf-8"
+      }
+    },
+    {
       "src": "/geometry-dash/(.*)",
       "dest": "/games/geometry-dash/$1"
     },
@@ -211,8 +218,11 @@
       "dest": "/games/minecraft/index.html"
     },
     {
-      "src": "/minecraft/(.*)",
-      "dest": "/games/minecraft/$1"
+      "src": "/minecraft/eaglercraft.html",
+      "dest": "/games/minecraft/eaglercraft.html",
+      "headers": {
+        "Content-Type": "text/html; charset=utf-8"
+      }
     },
     {
       "src": "/skate3",
@@ -275,28 +285,11 @@
       "dest": "/games/gta5/index.html"
     },
     {
-      "src": "/games/(.*)",
-      "dest": "/games/$1"
-    },
-    {
       "src": "/(.*)",
       "dest": "/$1"
     }
   ],
   "headers": [
-    {
-      "source": "/geometry-dash/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        },
-        {
-          "key": "Content-Encoding",
-          "value": "identity"
-        }
-      ]
-    },
     {
       "source": "/(.*)",
       "headers": [

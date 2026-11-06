@@ -195,13 +195,32 @@
         </button>
       </div>
       <div class="game-stage">
-        <iframe src="eaglercraft.html" allowfullscreen></iframe>
+        <iframe src="/games/minecraft/eaglercraft.html" allowfullscreen></iframe>
       </div>
     </div>
   </div>
 
   <script src="/starfield.js" defer></script>
   <script src="/js/game-shell.js"></script>
-<script src="/js/ui-settings.js"></script>
+  <script src="/js/ui-settings.js"></script>
+  <script>
+    console.log('[Minecraft] Page loaded');
+    console.log('[Minecraft] Current URL:', window.location.href);
+    console.log('[Minecraft] Iframe src:', document.querySelector('iframe')?.src);
+
+    // Wait for iframe to load
+    const iframe = document.querySelector('iframe');
+    if (iframe) {
+      iframe.addEventListener('load', () => {
+        console.log('[Minecraft] Iframe loaded successfully');
+      });
+      iframe.addEventListener('error', (e) => {
+        console.error('[Minecraft] Iframe error:', e);
+      });
+    }
+
+    // Check if scripts loaded
+    console.log('[Minecraft] ui-settings loaded:', typeof window.DUB5_UI_SETTINGS !== 'undefined');
+  </script>
 </body>
 </html>

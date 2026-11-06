@@ -156,6 +156,24 @@
 
   <script src="/starfield.js" defer></script>
   <script>
+    console.log('[Geometry Dash] Page loaded');
+    console.log('[Geometry Dash] Current URL:', window.location.href);
+    console.log('[Geometry Dash] Iframe src:', document.querySelector('iframe')?.src);
+
+    // Wait for iframe to load
+    const iframe = document.querySelector('iframe');
+    if (iframe) {
+      iframe.addEventListener('load', () => {
+        console.log('[Geometry Dash] Iframe loaded successfully');
+      });
+      iframe.addEventListener('error', (e) => {
+        console.error('[Geometry Dash] Iframe error:', e);
+      });
+    }
+
+    // Check if scripts loaded
+    console.log('[Geometry Dash] ui-settings loaded:', typeof window.DUB5_UI_SETTINGS !== 'undefined');
+
     // Save state when leaving
     function savePageState() {
       try {
