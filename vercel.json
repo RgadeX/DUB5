@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "public": true,
   "rewrites": [
     {
       "source": "/snake",
@@ -256,6 +257,20 @@
   ],
   "routes": [
     {
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
+    },
+    {
+      "src": "/starfield.js",
+      "dest": "/public/starfield.js",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
+    },
+    {
       "src": "/sw.js",
       "headers": {
         "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -264,6 +279,19 @@
     }
   ],
   "headers": [
+    {
+      "source": "/geometry-dash/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Content-Encoding",
+          "value": "identity"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
