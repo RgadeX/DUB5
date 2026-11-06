@@ -1,5 +1,259 @@
 {
   "version": 2,
+  "rewrites": [
+    {
+      "source": "/snake",
+      "destination": "/games/snake/index.html"
+    },
+    {
+      "source": "/minesweeper",
+      "destination": "/games/minesweeper/index.html"
+    },
+    {
+      "source": "/blockblast",
+      "destination": "/games/blockblast/index.html"
+    },
+    {
+      "source": "/rekenmachine",
+      "destination": "/games/rekenmachine/index.html"
+    },
+    {
+      "source": "/2048",
+      "destination": "/games/2048/index.html"
+    },
+    {
+      "source": "/tetris",
+      "destination": "/games/tetris/index.html"
+    },
+    {
+      "source": "/memory",
+      "destination": "/games/memory/index.html"
+    },
+    {
+      "source": "/flappy",
+      "destination": "/games/flappy/index.html"
+    },
+    {
+      "source": "/pong",
+      "destination": "/games/pong/index.html"
+    },
+    {
+      "source": "/sudoku",
+      "destination": "/games/sudoku/index.html"
+    },
+    {
+      "source": "/gnomelauncher",
+      "destination": "/games/gnomelauncher/index.html"
+    },
+    {
+      "source": "/breakout",
+      "destination": "/games/breakout/index.html"
+    },
+    {
+      "source": "/baseball",
+      "destination": "/games/baseball/index.html"
+    },
+    {
+      "source": "/tools",
+      "destination": "/tools/index.html"
+    },
+    {
+      "source": "/kleurenkiezer",
+      "destination": "/kleurenkiezer/index.html"
+    },
+    {
+      "source": "/qr-generator",
+      "destination": "/qr-generator/index.html"
+    },
+    {
+      "source": "/wachtwoord",
+      "destination": "/wachtwoord/index.html"
+    },
+    {
+      "source": "/tekst",
+      "destination": "/tekst/index.html"
+    },
+    {
+      "source": "/eenheden",
+      "destination": "/eenheden/index.html"
+    },
+    {
+      "source": "/numworks",
+      "destination": "/numworks/index.html"
+    },
+    {
+      "source": "/biologie",
+      "destination": "/biologie/index.html"
+    },
+    {
+      "source": "/woordenlijst",
+      "destination": "/woordenlijst/index.html"
+    },
+    {
+      "source": "/blooket-hacks",
+      "destination": "/blooket-hacks/index.html"
+    },
+    {
+      "source": "/alle-hacks",
+      "destination": "/alle-hacks/index.html"
+    },
+    {
+      "source": "/kahoot-hacks",
+      "destination": "/kahoot-hacks/index.html"
+    },
+    {
+      "source": "/quizlet-hacks",
+      "destination": "/quizlet-hacks/index.html"
+    },
+    {
+      "source": "/gimkit-hacks",
+      "destination": "/gimkit-hacks/index.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/handleidingen",
+      "destination": "/handleidingen/index.html"
+    },
+    {
+      "source": "/how-to",
+      "destination": "/how-to/index.html"
+    },
+    {
+      "source": "/installatie",
+      "destination": "/installatie/index.html"
+    },
+    {
+      "source": "/tips",
+      "destination": "/tips/index.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq/index.html"
+    },
+    {
+      "source": "/problemen",
+      "destination": "/problemen/index.html"
+    },
+    {
+      "source": "/stacktris",
+      "destination": "/games/stacktris/index.html"
+    },
+    {
+      "source": "/stacktris/:match*",
+      "destination": "/games/stacktris/:match*"
+    },
+    {
+      "source": "/liquid-soccer",
+      "destination": "/games/liquid-soccer/index.html"
+    },
+    {
+      "source": "/liquid-soccer/:match*",
+      "destination": "/games/liquid-soccer/:match*"
+    },
+    {
+      "source": "/block-blast",
+      "destination": "/games/blockblast-pro/index.html"
+    },
+    {
+      "source": "/block-blast/:match*",
+      "destination": "/games/blockblast-pro/:match*"
+    },
+    {
+      "source": "/subway-surfers",
+      "destination": "/games/subway-surfers/index.html"
+    },
+    {
+      "source": "/subway-surfers/:match*",
+      "destination": "/games/subway-surfers/:match*"
+    },
+    {
+      "source": "/geometry-dash",
+      "destination": "/games/geometry-dash/index.html"
+    },
+    {
+      "source": "/geometry-dash/:match*",
+      "destination": "/games/geometry-dash/:match*"
+    },
+    {
+      "source": "/nsmbw-web-port",
+      "destination": "/games/nsmbw-web-port/index.html"
+    },
+    {
+      "source": "/SM64-PC-Port-WebGL",
+      "destination": "/games/SM64-PC-Port-WebGL/index.html"
+    },
+    {
+      "source": "/minecraft",
+      "destination": "/games/minecraft/index.html"
+    },
+    {
+      "source": "/minecraft/:match*",
+      "destination": "/games/minecraft/:match*"
+    },
+    {
+      "source": "/skate3",
+      "destination": "/games/skate3/index.html"
+    },
+    {
+      "source": "/gta-vice-city",
+      "destination": "/games/gta-vice-city/index.html"
+    },
+    {
+      "source": "/simpsons-hit-and-run",
+      "destination": "/games/simpsons-hit-and-run/index.html"
+    },
+    {
+      "source": "/skate-rust",
+      "destination": "/games/skate-rust/index.html"
+    },
+    {
+      "source": "/cs-surf",
+      "destination": "/games/cs-surf/index.html"
+    },
+    {
+      "source": "/halo-ce",
+      "destination": "/games/halo-ce/index.html"
+    },
+    {
+      "source": "/halo-ce-mobile",
+      "destination": "/games/halo-ce-mobile/index.html"
+    },
+    {
+      "source": "/pes6",
+      "destination": "/games/pes6/index.html"
+    },
+    {
+      "source": "/bo1-zombies",
+      "destination": "/games/bo1-zombies/index.html"
+    },
+    {
+      "source": "/moon-zombies",
+      "destination": "/games/moon-zombies/index.html"
+    },
+    {
+      "source": "/kino-der-toten",
+      "destination": "/games/kino-der-toten/index.html"
+    },
+    {
+      "source": "/bo3-cheese-cube",
+      "destination": "/games/bo3-cheese-cube/index.html"
+    },
+    {
+      "source": "/bo2",
+      "destination": "/games/bo2/index.html"
+    },
+    {
+      "source": "/mw2",
+      "destination": "/games/mw2/index.html"
+    },
+    {
+      "source": "/gta5",
+      "destination": "/games/gta5/index.html"
+    }
+  ],
   "routes": [
     {
       "src": "/sw.js",
@@ -7,286 +261,6 @@
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Service-Worker-Allowed": "/"
       }
-    },
-    {
-      "src": "/js/(.*)",
-      "dest": "/js/$1",
-      "headers": {
-        "Cache-Control": "public, max-age=3600"
-      }
-    },
-    {
-      "src": "/starfield.js",
-      "dest": "/starfield.js",
-      "headers": {
-        "Cache-Control": "public, max-age=3600"
-      }
-    },
-    {
-      "src": "/snake",
-      "dest": "/games/snake/index.html"
-    },
-    {
-      "src": "/minesweeper",
-      "dest": "/games/minesweeper/index.html"
-    },
-    {
-      "src": "/blockblast",
-      "dest": "/games/blockblast/index.html"
-    },
-    {
-      "src": "/rekenmachine",
-      "dest": "/games/rekenmachine/index.html"
-    },
-    {
-      "src": "/2048",
-      "dest": "/games/2048/index.html"
-    },
-    {
-      "src": "/tetris",
-      "dest": "/games/tetris/index.html"
-    },
-    {
-      "src": "/memory",
-      "dest": "/games/memory/index.html"
-    },
-    {
-      "src": "/flappy",
-      "dest": "/games/flappy/index.html"
-    },
-    {
-      "src": "/pong",
-      "dest": "/games/pong/index.html"
-    },
-    {
-      "src": "/sudoku",
-      "dest": "/games/sudoku/index.html"
-    },
-    {
-      "src": "/gnomelauncher",
-      "dest": "/games/gnomelauncher/index.html"
-    },
-    {
-      "src": "/breakout",
-      "dest": "/games/breakout/index.html"
-    },
-    {
-      "src": "/baseball",
-      "dest": "/games/baseball/index.html"
-    },
-    {
-      "src": "/tools",
-      "dest": "/tools/index.html"
-    },
-    {
-      "src": "/kleurenkiezer",
-      "dest": "/kleurenkiezer/index.html"
-    },
-    {
-      "src": "/qr-generator",
-      "dest": "/qr-generator/index.html"
-    },
-    {
-      "src": "/wachtwoord",
-      "dest": "/wachtwoord/index.html"
-    },
-    {
-      "src": "/tekst",
-      "dest": "/tekst/index.html"
-    },
-    {
-      "src": "/eenheden",
-      "dest": "/eenheden/index.html"
-    },
-    {
-      "src": "/numworks",
-      "dest": "/numworks/index.html"
-    },
-    {
-      "src": "/biologie",
-      "dest": "/biologie/index.html"
-    },
-    {
-      "src": "/woordenlijst",
-      "dest": "/woordenlijst/index.html"
-    },
-    {
-      "src": "/blooket-hacks",
-      "dest": "/blooket-hacks/index.html"
-    },
-    {
-      "src": "/alle-hacks",
-      "dest": "/alle-hacks/index.html"
-    },
-    {
-      "src": "/kahoot-hacks",
-      "dest": "/kahoot-hacks/index.html"
-    },
-    {
-      "src": "/quizlet-hacks",
-      "dest": "/quizlet-hacks/index.html"
-    },
-    {
-      "src": "/gimkit-hacks",
-      "dest": "/gimkit-hacks/index.html"
-    },
-    {
-      "src": "/blog",
-      "dest": "/blog/index.html"
-    },
-    {
-      "src": "/handleidingen",
-      "dest": "/handleidingen/index.html"
-    },
-    {
-      "src": "/how-to",
-      "dest": "/how-to/index.html"
-    },
-    {
-      "src": "/installatie",
-      "dest": "/installatie/index.html"
-    },
-    {
-      "src": "/tips",
-      "dest": "/tips/index.html"
-    },
-    {
-      "src": "/faq",
-      "dest": "/faq/index.html"
-    },
-    {
-      "src": "/problemen",
-      "dest": "/problemen/index.html"
-    },
-    {
-      "src": "/stacktris",
-      "dest": "/games/stacktris/index.html"
-    },
-    {
-      "src": "/stacktris/(.*)",
-      "dest": "/games/stacktris/$1"
-    },
-    {
-      "src": "/liquid-soccer",
-      "dest": "/games/liquid-soccer/index.html"
-    },
-    {
-      "src": "/liquid-soccer/(.*)",
-      "dest": "/games/liquid-soccer/$1"
-    },
-    {
-      "src": "/block-blast",
-      "dest": "/games/blockblast-pro/index.html"
-    },
-    {
-      "src": "/block-blast/(.*)",
-      "dest": "/games/blockblast-pro/$1"
-    },
-    {
-      "src": "/subway-surfers",
-      "dest": "/games/subway-surfers/index.html"
-    },
-    {
-      "src": "/subway-surfers/(.*)",
-      "dest": "/games/subway-surfers/$1"
-    },
-    {
-      "src": "/geometry-dash",
-      "dest": "/games/geometry-dash/index.html"
-    },
-    {
-      "src": "/geometry-dash/game.html",
-      "dest": "/games/geometry-dash/game.html",
-      "headers": {
-        "Content-Type": "text/html; charset=utf-8"
-      }
-    },
-    {
-      "src": "/geometry-dash/(.*)",
-      "dest": "/games/geometry-dash/$1"
-    },
-    {
-      "src": "/nsmbw-web-port",
-      "dest": "/games/nsmbw-web-port/index.html"
-    },
-    {
-      "src": "/SM64-PC-Port-WebGL",
-      "dest": "/games/SM64-PC-Port-WebGL/index.html"
-    },
-    {
-      "src": "/minecraft",
-      "dest": "/games/minecraft/index.html"
-    },
-    {
-      "src": "/minecraft/eaglercraft.html",
-      "dest": "/games/minecraft/eaglercraft.html",
-      "headers": {
-        "Content-Type": "text/html; charset=utf-8"
-      }
-    },
-    {
-      "src": "/skate3",
-      "dest": "/games/skate3/index.html"
-    },
-    {
-      "src": "/gta-vice-city",
-      "dest": "/games/gta-vice-city/index.html"
-    },
-    {
-      "src": "/simpsons-hit-and-run",
-      "dest": "/games/simpsons-hit-and-run/index.html"
-    },
-    {
-      "src": "/skate-rust",
-      "dest": "/games/skate-rust/index.html"
-    },
-    {
-      "src": "/cs-surf",
-      "dest": "/games/cs-surf/index.html"
-    },
-    {
-      "src": "/halo-ce",
-      "dest": "/games/halo-ce/index.html"
-    },
-    {
-      "src": "/halo-ce-mobile",
-      "dest": "/games/halo-ce-mobile/index.html"
-    },
-    {
-      "src": "/pes6",
-      "dest": "/games/pes6/index.html"
-    },
-    {
-      "src": "/bo1-zombies",
-      "dest": "/games/bo1-zombies/index.html"
-    },
-    {
-      "src": "/moon-zombies",
-      "dest": "/games/moon-zombies/index.html"
-    },
-    {
-      "src": "/kino-der-toten",
-      "dest": "/games/kino-der-toten/index.html"
-    },
-    {
-      "src": "/bo3-cheese-cube",
-      "dest": "/games/bo3-cheese-cube/index.html"
-    },
-    {
-      "src": "/bo2",
-      "dest": "/games/bo2/index.html"
-    },
-    {
-      "src": "/mw2",
-      "dest": "/games/mw2/index.html"
-    },
-    {
-      "src": "/gta5",
-      "dest": "/games/gta5/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
     }
   ],
   "headers": [
