@@ -42,14 +42,15 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; overflow: hidden; height: 100%; }
 
   body {
     min-height: 100vh;
+    height: 100%;
     background: radial-gradient(140% 100% at 50% -10%, #0b1150 0%, #050833 42%, #01030f 100%);
     color: #fff;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    overflow-x: hidden;
+    overflow: hidden;
     position: relative;
     -webkit-font-smoothing: antialiased;
   }
@@ -80,11 +81,11 @@
   .page {
     position: relative;
     z-index: 10;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 3rem 1.5rem 4rem;
+    padding: 4rem 1.5rem 0.5rem;
   }
 
   /* ---------- Header ---------- */
@@ -95,7 +96,8 @@
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    margin-bottom: 2.25rem;
+    margin-bottom: 0.25rem;
+    flex-shrink: 0;
   }
 
   .back-link-fixed {
@@ -143,7 +145,7 @@
   .game-title {
     font-family: 'DM Serif Display', serif;
     font-weight: normal;
-    font-size: 4.5rem;
+    font-size: 2rem;
     line-height: 1;
     letter-spacing: 0.01em;
     color: #fff;
@@ -153,8 +155,8 @@
   }
 
   .game-subline {
-    margin-top: 0.85rem;
-    font-size: 0.95rem;
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
     color: var(--ink-dim);
     opacity: 0;
     animation: fade-in 700ms ease-out 200ms forwards;
@@ -164,7 +166,8 @@
     height: 1px;
     width: 100%;
     max-width: 1040px;
-    margin-top: 1.75rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     transform: scaleX(0);
     transform-origin: center center;
     background: linear-gradient(
@@ -177,6 +180,7 @@
     );
     opacity: 0.75;
     animation: rule-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) 320ms forwards;
+    flex-shrink: 0;
   }
 
   /* ---------- Game surface ---------- */
@@ -190,9 +194,13 @@
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-inset), var(--glass-shadow);
-    padding: 1.25rem;
+    padding: 1rem;
     opacity: 0;
     animation: card-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 420ms forwards;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ---------- Minesweeper HUD ---------- */
@@ -332,6 +340,8 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
     overflow: hidden;
     transition: box-shadow 220ms ease;
+    flex: 1;
+    min-height: 0;
   }
 
   /* ---------- Fullscreen button ---------- */
@@ -1602,7 +1612,9 @@ function buildBoard() {
 
   boardEl.innerHTML = '';
   boardEl.style.gridTemplateColumns = 'repeat(' + game.cols + ', 1fr)';
-  boardEl.style.maxWidth = Math.min(1000, game.cols * 42) + 'px';
+  
+  // Calculate dynamic cell size based on available space
+  adjustBoardSize();
 
   for (let i = 0; i < game.cols * game.rows; i++) {
     const cell = document.createElement('button');
@@ -1624,6 +1636,40 @@ function buildBoard() {
 
   updateMineCounter();
   updateTimer(0);
+  
+  // Adjust size after a short delay to ensure DOM is ready
+  setTimeout(adjustBoardSize, 50);
+}
+
+// Adjust board size on window resize
+let resizeTimer = null;
+window.addEventListener('resize', function () {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(adjustBoardSize, 100);
+});
+
+function adjustBoardSize() {
+  const boardWrap = document.getElementById('boardWrap');
+  if (!boardWrap) return;
+  
+  const availableWidth = boardWrap.clientWidth - 20; // Subtract padding
+  const availableHeight = boardWrap.clientHeight - 20;
+  
+  // Calculate cell size to fit both dimensions
+  const maxCellWidth = availableWidth / game.cols;
+  const maxCellHeight = availableHeight / game.rows;
+  const cellSize = Math.min(maxCellWidth, maxCellHeight, 50); // Max 50px per cell
+  
+  const boardWidth = cellSize * game.cols;
+  const boardHeight = cellSize * game.rows;
+  
+  boardEl.style.maxWidth = boardWidth + 'px';
+  boardEl.style.width = boardWidth + 'px';
+  boardEl.style.height = boardHeight + 'px';
+  
+  // Adjust cell gap based on cell size
+  const gap = Math.max(2, cellSize * 0.08);
+  boardEl.style.gap = gap + 'px';
 }
 
 function placeMines(safeIdx) {
@@ -2156,10 +2202,11 @@ showOverlay('settingsOverlay', true);
    FULLSCREEN
    ========================================================= */
 const fullscreenBtn = document.getElementById('fullscreenBtn');
-if (fullscreenBtn) {
+const gameShell = document.querySelector('.game-shell');
+if (fullscreenBtn && gameShell) {
   fullscreenBtn.addEventListener('click', function () {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(function (err) {
+      gameShell.requestFullscreen().catch(function (err) {
         console.log('Fullscreen error:', err);
       });
     } else {
@@ -2170,8 +2217,12 @@ if (fullscreenBtn) {
   document.addEventListener('fullscreenchange', function () {
     if (document.fullscreenElement) {
       fullscreenBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
+      // Adjust board size when entering fullscreen
+      setTimeout(adjustBoardSize, 200);
     } else {
       fullscreenBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+      // Adjust board size when exiting fullscreen
+      setTimeout(adjustBoardSize, 200);
     }
   });
 }
@@ -2202,5 +2253,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script src="/js/ui-settings.js"></script>
 </body>
 </html>

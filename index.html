@@ -64,7 +64,7 @@
         content: "";
         position: fixed;
         inset: -15%;
-        z-index: 0;
+        z-index: -1;
         pointer-events: none;
         background:
           radial-gradient(42% 34% at 16% 10%, rgba(70, 110, 255, 0.20), transparent 68%),
@@ -76,7 +76,7 @@
       .stars {
         position: fixed;
         inset: 0;
-        z-index: 1;
+        z-index: 0;
         width: 100%;
         height: 100%;
         pointer-events: none;
@@ -734,6 +734,21 @@
       .cat-section { scroll-margin-top: 110px; }
       .cat-section + .cat-section { margin-top: 3rem; }
 
+      .section-separator {
+        height: 1px;
+        max-width: 1280px;
+        margin: 2.5rem auto;
+        background: linear-gradient(
+          90deg,
+          rgba(190, 215, 255, 0) 0%,
+          rgba(190, 215, 255, 0.25) 12%,
+          rgba(214, 232, 255, 0.5) 50%,
+          rgba(190, 215, 255, 0.25) 88%,
+          rgba(190, 215, 255, 0) 100%
+        );
+        opacity: 0.6;
+      }
+
       .section-head {
         max-width: 1280px;
         margin: 0 auto 1.1rem;
@@ -935,14 +950,10 @@
           <span>DUB5</span>
         </a>
         <div class="topbar-links">
-          <a class="topbar-link" href="#games"  data-nav="games">Games</a>
-          <a class="topbar-link" href="#tools"  data-nav="tools">Tools</a>
-          <a class="topbar-link" href="#gallery" data-nav="gallery">Galerij</a>
+          <a class="topbar-link" href="#games"  data-nav="games">DUB5 Games</a>
+          <a class="topbar-link" href="#games" data-nav="games">Originele Games</a>
+          <a class="topbar-link" href="#tools"  data-nav="tools">Overig</a>
         </div>
-        <button class="layout-btn" id="layoutBtn" title="Layout: Pill" aria-label="Layout wisselen">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="7" rx="1.5"/>
-            <rect x="3" y="13" width="8" height="8" rx="1.5"/>
             <rect x="13" y="13" width="8" height="8" rx="1.5"/>
           </svg>
         </button>
@@ -959,7 +970,6 @@
           <h1>DUB5</h1>
         </div>
         <div class="rating-stars" aria-label="5 van 5 sterren">★★★★★</div>
-        <p class="subline">Games, tools en leermateriaal op één plek.</p>
         <div class="header-rule" aria-hidden="true"></div>
       </header>
 
@@ -982,7 +992,7 @@
     <div class="install-prompt" id="installPrompt" role="dialog" aria-label="App installeren">
       <button class="install-prompt-close" id="installPromptClose" type="button" aria-label="Sluiten">×</button>
       <div class="install-prompt-title">Download DUB5</div>
-      <div class="install-prompt-text">Installeer de app om DUB5 offline</div>
+      <div class="install-prompt-text">Installeer de app om DUB5 offline te gebruiken</div>
       <div class="install-prompt-actions">
         <button class="install-prompt-download" id="installPromptBtn" type="button"><span class="install-prompt-download-glow"></span>Downloaden</button>
       </div>
@@ -1194,37 +1204,53 @@
          ========================================================= */
       const CATEGORIES = [
         { id: 'games',  label: 'Games' },
-        { id: 'tools',  label: 'Tools' },
-        { id: 'gallery', label: 'Galerij & Herinneringen' }
+        { id: 'tools',  label: 'Overig' }
       ];
 
       const ITEMS = [
-        { title: 'Snake', desc: 'Klassiek slangen-spel, vlotte besturing.', href: '/snake', cat: 'games', icon: 'snake', badge: 'Nieuw', external: false },
-        { title: 'Block Blast', desc: 'Blokken plaatsen en lijnen volmaken.', href: '/blockblast', cat: 'games', icon: 'blocks', external: false },
-        { title: 'Block Blast Pro', desc: 'Het originele Block Blast spel.', href: '/block-blast', cat: 'games', icon: 'blocks', badge: 'Nieuw', external: false },
-        { title: 'Subway Surfers', desc: 'Ren, spring en pak coins in de metro.', href: '/subway-surfers', cat: 'games', icon: 'bolt', badge: 'Nieuw', external: false },
-        { title: 'Geometry Dash', desc: 'De volledige game — eenmalig ~300 MB downloaden.', href: '/geometry-dash', cat: 'games', icon: 'gamepad', badge: 'Nieuw', external: false },
-        { title: 'Rekenmachine Spelletjes', desc: 'Spelletjes spelen op je rekenmachine.', href: '/rekenmachine', cat: 'games', icon: 'calc', badge: 'Nieuw', external: false },
-        { title: '2048', desc: 'Schuif tegels samen en haal 2048.', href: '/2048', cat: 'games', icon: 'merge', external: false },
-        { title: 'Tetris', desc: 'Blokken laten vallen, rijen volmaken.', href: '/tetris', cat: 'games', icon: 'tetris', external: false },
-        { title: 'Mijnenveger', desc: 'Het klassieke mijnenveger-bord.', href: '/minesweeper', cat: 'games', icon: 'mine', external: false },
-        { title: 'Flappy Bird', desc: 'Tik en vlieg tussen de buizen door.', href: '/flappy', cat: 'games', icon: 'plane', external: false },
-        { title: 'Pong', desc: 'Twee peddels, één bal, eindeloos.', href: '/pong', cat: 'games', icon: 'pong', external: false },
-        { title: 'Gnome Launcher', desc: 'De klassieke Linux Gnome.', href: '/gnomelauncher', cat: 'games', icon: 'star', external: false },
-        { title: 'Breakout', desc: 'Breek de blokken met de bal.', href: '/breakout', cat: 'games', icon: 'game', external: false },
-        { title: 'Baseball', desc: 'Sla de bal en scoor punten.', href: '/baseball', cat: 'games', icon: 'game', external: false },
-        { title: 'Liquid Soccer', desc: 'Vloeibare voetbal — dynamisch en verslavend.', href: '/liquid-soccer', cat: 'games', icon: 'game', badge: 'Nieuw', external: false },
-        { title: 'Stacktris', desc: 'Stapel blokken en ruim het bord op.', href: '/stacktris', cat: 'games', icon: 'tetris', badge: 'Nieuw', external: false },
+        // DUB5-made games (source code available)
+        { title: 'Snake', desc: 'Klassieke slang met zoom en vol modus.', href: '/snake', cat: 'games', icon: 'snake', external: false, type: 'dub5' },
+        { title: 'Block Blast', desc: 'Blokken plaatsen en lijnen volmaken.', href: '/blockblast', cat: 'games', icon: 'blocks', external: false, type: 'dub5' },
+        { title: 'Rekenmachine Spelletjes', desc: 'Spelletjes spelen op je rekenmachine.', href: '/rekenmachine', cat: 'games', icon: 'calc', external: false, type: 'dub5', localOnly: true },
+        { title: '2048', desc: 'Schuif tegels samen en haal 2048.', href: '/2048', cat: 'games', icon: 'merge', external: false, type: 'dub5' },
+        { title: 'Tetris', desc: 'Blokken laten vallen, rijen volmaken.', href: '/tetris', cat: 'games', icon: 'tetris', external: false, type: 'dub5' },
+        { title: 'Mijnenveger', desc: 'Het klassieke mijnenveger-bord.', href: '/minesweeper', cat: 'games', icon: 'mine', external: false, type: 'dub5' },
+        { title: 'Flappy Bird', desc: 'Tik en vlieg tussen de buizen door.', href: '/flappy', cat: 'games', icon: 'plane', external: false, type: 'dub5' },
+        { title: 'Pong', desc: 'Twee peddels, één bal, eindeloos.', href: '/pong', cat: 'games', icon: 'pong', external: false, type: 'dub5' },
+        { title: 'Breakout', desc: 'Breek de blokken met de bal.', href: '/breakout', cat: 'games', icon: 'game', external: false, type: 'dub5' },
 
-        { title: 'Numworks Scripts Manager', desc: 'Beheer en voeg scripts toe aan Numworks.', href: '/numworks', cat: 'tools', icon: 'code', badge: 'Nieuw', external: false },
+        // Linked to original games (iframe/embedded)
+        { title: 'GTA 5', desc: 'Grand Theft Auto V — Los Santos in je browser.', href: '/gta5', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Liquid Soccer', desc: 'Vloeibare voetbal — dynamisch en verslavend.', href: '/liquid-soccer', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Stacktris', desc: 'Stapel blokken en ruim het bord op.', href: '/stacktris', cat: 'games', icon: 'tetris', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Geometry Dash', desc: 'De volledige game — eenmalig ~300 MB downloaden.', href: '/geometry-dash', cat: 'games', icon: 'gamepad', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Minecraft', desc: 'Het iconische sandbox bouwspel.', href: '/minecraft', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Super Mario 64', desc: 'De legendarische 3D Mario avontuur — nu speelbaar in je browser.', href: '/SM64-PC-Port-WebGL', cat: 'games', icon: 'gamepad', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Block Blast', desc: 'Het originele Block Blast spel.', href: '/block-blast', cat: 'games', icon: 'blocks', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Subway Surfers', desc: 'Ren, spring en pak coins in de metro.', href: '/subway-surfers', cat: 'games', icon: 'bolt', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'New Super Mario Bros Wii', desc: 'De klassieke Mario ervaring — nu in je browser.', href: '/nsmbw-web-port', cat: 'games', icon: 'gamepad', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Skate 3', desc: 'Het ultieme skateboard-spel.', href: '/skate3', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'GTA Vice City', desc: 'De klassieke open wereld van Vice City.', href: '/gta-vice-city', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Skate Rust', desc: 'Skaten in een open wereld.', href: '/skate-rust', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'CS Surf', desc: 'Counter-Strike surf maps in je browser.', href: '/cs-surf', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Halo CE', desc: 'Halo Combat Evolved in je browser.', href: '/halo-ce', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Halo CE Mobile', desc: 'Halo Combat Evolved voor mobiel.', href: '/halo-ce-mobile', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'PES 6', desc: 'Pro Evolution Soccer 6 — klassieke voetbalgame.', href: '/pes6', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'BO1 Zombies', desc: 'Black Ops 1 Zombies — overleef de horde.', href: '/bo1-zombies', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Moon Zombies', desc: 'Zombies op de maan — overleef de nacht.', href: '/moon-zombies', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Kino der Toten', desc: 'Klassieke Zombies map — cinema horror.', href: '/kino-der-toten', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'BO3 Cheese Cube', desc: 'Black Ops 3 Cheese Cube Zombies.', href: '/bo3-cheese-cube', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Modern Warfare 2', desc: 'Call of Duty MW2 — de legendarische FPS.', href: '/mw2', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
 
-        { title: 'Cijferkaart', desc: 'Ultimate Team Pack Simulator — open pakketten en verzamel kaarten.', href: '/cijferkaart', cat: 'tools', icon: 'cards', badge: 'Nieuw', external: false },
+        { title: 'Numworks Scripts Manager', desc: 'Beheer en voeg scripts toe aan Numworks.', href: '/numworks', cat: 'tools', icon: 'code', external: false, localOnly: true },
+
+        { title: 'Cijferkaart', desc: 'Ultimate Team Pack Simulator — open pakketten en verzamel kaarten.', href: '/cijferkaart', cat: 'tools', icon: 'cards', external: false, localOnly: true },
 
         /* ---------------- SHOWCASE ---------------- */
-        { title: 'Showcase', desc: 'Demonstratie van tekst- en display-types.', href: '/showcase', cat: 'tools', icon: 'star', badge: 'NEW', external: false },
+        { title: 'Showcase', desc: 'Demonstratie van tekst- en display-types.', href: '/showcase', cat: 'tools', icon: 'star', external: false, localOnly: true },
 
         /* ---------------- GALLERY ---------------- */
-        { title: 'Galerij & Herinneringen', desc: 'Funny moments, video\'s en foto\'s.', href: '/gallery', cat: 'gallery', icon: 'gallery', badge: 'Nieuw', external: false, localOnly: true }
+        { title: 'Galerij & Herinneringen', desc: 'Funny moments, video\'s en foto\'s.', href: '/gallery', cat: 'tools', icon: 'gallery', external: false, localOnly: true }
       ];
 
       /* =========================================================
@@ -1240,10 +1266,18 @@
         const target = item.external ? ' target="_blank" rel="noopener noreferrer"' : '';
         const badge = item.badge ? '<span class="badge">' + item.badge + '</span>' : '';
 
+        // Use image if provided, otherwise fall back to icon
+        let iconContent;
+        if (item.image) {
+          iconContent = '<img src="' + item.image + '" alt="" width="40" height="40" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+        } else {
+          iconContent = ICONS[item.icon] || '';
+        }
+
         return '<a class="nav-button" data-cat="' + item.cat + '" href="' + item.href + '"' + target +
           ' style="--i:' + index + '">' +
             '<span class="nav-button-glow"></span>' +
-            '<span class="icon-chip">' + (ICONS[item.icon] || '') + '</span>' +
+            '<span class="icon-chip">' + iconContent + '</span>' +
             '<span class="nav-button-title">' + item.title + '</span>' +
             '<span class="nav-button-desc">' + item.desc + '</span>' +
             badge +
@@ -1255,21 +1289,88 @@
       // they are excluded from the Vercel deployment.
       const IS_LOCAL_HOST = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
       const VISIBLE_ITEMS = ITEMS.filter(function (item) { return !item.localOnly || IS_LOCAL_HOST; });
-      if (!IS_LOCAL_HOST) {
-        document.querySelectorAll('a[data-nav="gallery"]').forEach(function (a) { a.remove(); });
-      }
 
       function render(view) {
         currentView = view;
 
         if (view === 'all') {
-          content.innerHTML = '<div class="nav-grid">' +
-            VISIBLE_ITEMS.map(function (item, i) { return cardHTML(item, i); }).join('') +
-            '</div>';
+          // Split games into DUB5-made and linked
+          const games = VISIBLE_ITEMS.filter(function (item) { return item.cat === 'games'; });
+          const dub5Games = games.filter(function (item) { return item.type === 'dub5'; });
+          const linkedGames = games.filter(function (item) { return item.type === 'linked'; });
+          const otherItems = VISIBLE_ITEMS.filter(function (item) { return item.cat !== 'games'; });
+
+          let html = '';
+          let index = 0;
+
+          // DUB5-made games section
+          if (dub5Games.length > 0) {
+            html += '<div class="nav-grid">' +
+              dub5Games.map(function (item) { return cardHTML(item, index++); }).join('') +
+              '</div>';
+          }
+
+          // Separator line
+          if (dub5Games.length > 0 && linkedGames.length > 0) {
+            html += '<div class="section-separator"></div>';
+          }
+
+          // Linked games section
+          if (linkedGames.length > 0) {
+            html += '<div class="nav-grid">' +
+              linkedGames.map(function (item) { return cardHTML(item, index++); }).join('') +
+              '</div>';
+          }
+
+          // Other items (tools, gallery, etc.)
+          if (otherItems.length > 0) {
+            if (games.length > 0) {
+              html += '<div class="section-separator"></div>';
+            }
+            html += '<div class="nav-grid">' +
+              otherItems.map(function (item) { return cardHTML(item, index++); }).join('') +
+              '</div>';
+          }
+
+          content.innerHTML = html;
         } else {
           content.innerHTML = CATEGORIES.map(function (cat) {
             const items = VISIBLE_ITEMS.filter(function (item) { return item.cat === cat.id; });
             if (!items.length) return '';
+
+            // For games category, split into DUB5-made and linked with labels
+            if (cat.id === 'games') {
+              const dub5Games = items.filter(function (item) { return item.type === 'dub5'; });
+              const linkedGames = items.filter(function (item) { return item.type === 'linked'; });
+
+              let html = '<section class="cat-section" data-cat="' + cat.id + '" id="' + cat.id + '">';
+              let index = 0;
+
+              if (dub5Games.length > 0) {
+                html += '<div class="section-head">' +
+                  '<h3>DUB5 Games</h3>' +
+                  '<span class="section-count">' + dub5Games.length + '</span>' +
+                '</div>' +
+                '<div class="nav-grid">' +
+                  dub5Games.map(function (item) { return cardHTML(item, index++); }).join('') +
+                '</div>';
+              }
+
+              if (linkedGames.length > 0) {
+                html += '<div class="section-head" style="margin-top: 3rem;">' +
+                  '<h3>Originele Games</h3>' +
+                  '<span class="section-count">' + linkedGames.length + '</span>' +
+                '</div>' +
+                '<div class="nav-grid">' +
+                  linkedGames.map(function (item) { return cardHTML(item, index++); }).join('') +
+                '</div>';
+              }
+
+              html += '</section>';
+              return html;
+            }
+
+            // Other categories (tools, gallery) - normal rendering
             return '<section class="cat-section" data-cat="' + cat.id + '" id="' + cat.id + '">' +
               '<div class="section-head">' +
                 '<h3>' + cat.label + '</h3>' +
@@ -1367,16 +1468,20 @@
       const layoutBtn = document.getElementById('layoutBtn');
 
       function applyLayout(id, label, showDesc) {
-        const navGrid = document.querySelector('.nav-grid');
-        
+        const navGrids = document.querySelectorAll('.nav-grid');
+
         if (id === 'four-columns') {
-          navGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+          navGrids.forEach(navGrid => {
+            navGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+          });
           document.querySelectorAll('.nav-button-desc').forEach(el => el.style.display = 'none');
         } else if (id === 'three-columns-with-desc') {
-          navGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+          navGrids.forEach(navGrid => {
+            navGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+          });
           document.querySelectorAll('.nav-button-desc').forEach(el => el.style.display = '');
         }
-        
+
         layoutBtn.title = 'Layout: ' + label;
         layoutBtn.setAttribute('aria-label', 'Layout: ' + label);
       }
@@ -1386,10 +1491,12 @@
         const L = LAYOUTS[layoutIndex];
         applyLayout(L.id, L.label, L.desc);
       });
-      
+
       // Apply default layout on load (3 columns without descriptions)
-      const navGrid = document.querySelector('.nav-grid');
-      navGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      const navGrids = document.querySelectorAll('.nav-grid');
+      navGrids.forEach(navGrid => {
+        navGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      });
       document.querySelectorAll('.nav-button-desc').forEach(el => el.style.display = 'none');
 
       /* =========================================================
@@ -1399,6 +1506,11 @@
         const bar = document.getElementById('topbar');
         const brand = document.querySelector('.topbar-brand');
         if (!bar) return;
+
+        // Scroll to top on page load/refresh
+        window.addEventListener('load', function() {
+          window.scrollTo(0, 0);
+        });
         
         // Hide brand on game pages (not landing page)
         if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
@@ -1698,6 +1810,7 @@
       })();
 
     </script>
+    <script src="/starfield.js" defer></script>
     <script src="/js/sw-register.js" defer></script>
     <script>
       // =========================================================
@@ -1760,5 +1873,6 @@
         window.addEventListener('appinstalled', hide);
       })();
     </script>
+    <script src="/js/ui-settings.js"></script>
   </body>
 </html>

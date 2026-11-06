@@ -239,60 +239,84 @@
   .back-link-fixed svg { width: 14px; height: 14px; flex-shrink: 0; }
 
   .top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: rgba(9, 13, 38, 0.62);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .top-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(224, 242, 254, 0.08) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  .top-bar.is-scrolled::before { opacity: 1; }
+
+  .topbar-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.95rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 14px 22px;
-    background: rgba(6, 9, 28, 0.55);
-    border-bottom: 1px solid var(--line);
-    box-shadow: 0 12px 32px -20px rgba(0, 0, 0, 1);
-    z-index: 5;
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
   }
 
-  .brand-mini {
-    font-family: var(--font-display);
-    font-size: clamp(1.25rem, 2vw, 1.7rem);
-    font-weight: 400;
-    letter-spacing: 0.03em;
-    color: #fff;
+  .topbar-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 4px 10px 4px 4px;
-    border-radius: var(--r-pill);
-    transition: background var(--dur) var(--ease);
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
   }
 
-  .brand-star {
-    width: 22px;
-    height: 22px;
+  .brand-mark {
+    width: 32px;
+    height: 32px;
     position: relative;
-    animation: brand-star-pulse 3s ease-in-out infinite;
-  }
-  
-  .brand-star::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(205,222,255,0.8) 20%, rgba(255,236,214,0.4) 50%, rgba(186,205,255,0.1) 80%, transparent 100%);
-    border-radius: 50%;
-    animation: brand-star-glow 2s ease-in-out infinite alternate;
-  }
-  
-  @keyframes brand-star-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-  }
-  
-  @keyframes brand-star-glow {
-    0% { opacity: 0.6; }
-    100% { opacity: 1; }
   }
 
-  .brand-mini svg { display: none; }
+  .brand-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .topbar-links {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .topbar-link {
+    padding: 0.5rem 1rem;
+    border-radius: var(--r-pill);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-dim);
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 200ms ease;
+  }
+
+  .topbar-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--line);
+  }
 
   .status {
     display: flex; align-items: center; gap: 10px;
@@ -1130,30 +1154,20 @@
 <body>
 <canvas class="stars" id="stars" aria-hidden="true"></canvas>
 
-<!-- ============ GLOBAL TOPBAR ============ -->
-<nav class="global-topbar" id="globalTopbar">
-  <div class="global-topbar-inner">
-    <a class="global-topbar-brand" href="/">
-      <span class="global-brand-mark" aria-hidden="true">
-        <div class="brand-star"></div>
+<!-- ============ TOPBAR ============ -->
+<nav class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <a class="topbar-brand" href="/">
+      <span class="brand-mark" aria-hidden="true">
+        <canvas class="brand-canvas" id="navStar"></canvas>
       </span>
       <span>DUB5</span>
     </a>
-    <div class="global-topbar-links">
-      <a class="global-topbar-link" href="/#games" data-nav="games">Games</a>
-      <a class="global-topbar-link" href="/#tools" data-nav="tools">Tools</a>
-      <a class="global-topbar-link" href="/#study" data-nav="study">Studie</a>
-      <a class="global-topbar-link" href="/#hacks" data-nav="hacks">Hacks</a>
-      <a class="global-topbar-link" href="/#guides" data-nav="guides">Uitleg</a>
-      <a class="global-topbar-link" href="/#gallery" data-nav="gallery">Galerij</a>
+    <div class="topbar-links">
+      <a class="topbar-link" href="/#games" data-nav="games">DUB5 Games</a>
+      <a class="topbar-link" href="/#games" data-nav="games">Originele Games</a>
+      <a class="topbar-link" href="/#tools" data-nav="tools">Overig</a>
     </div>
-    <button class="global-layout-btn" id="globalLayoutBtn" title="Layout: Pill" aria-label="Layout wisselen">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="7" rx="1.5"/>
-        <rect x="3" y="13" width="8" height="8" rx="1.5"/>
-        <rect x="13" y="13" width="8" height="8" rx="1.5"/>
-      </svg>
-    </button>
   </div>
 </nav>
 
@@ -1162,7 +1176,7 @@
     <path d="M19 12H5"/>
     <path d="m12 19-7-7 7-7"/>
   </svg>
-  Terug naar DUB5
+  Terug
 </a>
 
 <section id="landing-screen" class="landing-screen">
@@ -1478,6 +1492,66 @@
   });
   build(); start();
 })();
+</script>
+<script src="/starfield.js" defer></script>
+<script>
+// Navbar star animation (same as homepage)
+const navStarCanvas = document.getElementById('navStar');
+if (navStarCanvas) {
+  const ctx = navStarCanvas.getContext('2d');
+  let time = 0;
+  
+  function animateStar() {
+    time += 0.03;
+    const size = 32;
+    navStarCanvas.width = size;
+    navStarCanvas.height = size;
+    
+    // Clear
+    ctx.clearRect(0, 0, size, size);
+    
+    // Draw star shape
+    ctx.save();
+    ctx.translate(size/2, size/2);
+    ctx.rotate(time * 0.5);
+    
+    // Outer glow
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size/2);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.3, 'rgba(205, 222, 255, 0.8)');
+    gradient.addColorStop(0.6, 'rgba(255, 236, 214, 0.4)');
+    gradient.addColorStop(1, 'rgba(186, 205, 255, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const angle = (i * 72 - 90) * Math.PI / 180;
+      const x = Math.cos(angle) * (size/2 - 2);
+      const y = Math.sin(angle) * (size/2 - 2);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+      
+      const innerAngle = ((i * 72) + 36 - 90) * Math.PI / 180;
+      const innerX = Math.cos(innerAngle) * (size/6);
+      const innerY = Math.sin(innerAngle) * (size/6);
+      ctx.lineTo(innerX, innerY);
+    }
+    ctx.closePath();
+    ctx.fill();
+    
+    // Center dot
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+    
+    requestAnimationFrame(animateStar);
+  }
+  
+  animateStar();
+}
 </script>
 
 <!-- =========================================================

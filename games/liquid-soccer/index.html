@@ -36,14 +36,14 @@
 
 		* { margin: 0; padding: 0; box-sizing: border-box; }
 
-		html { -webkit-text-size-adjust: 100%; }
+		html { -webkit-text-size-adjust: 100%; overflow: hidden; height: 100%; }
 
 		body {
-			min-height: 100vh;
+			height: 100%;
 			background: radial-gradient(140% 100% at 50% -10%, #0b1150 0%, #050833 42%, #01030f 100%);
 			color: #fff;
 			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-			overflow-x: hidden;
+			overflow: hidden;
 			position: relative;
 			-webkit-font-smoothing: antialiased;
 		}
@@ -64,11 +64,11 @@
 		.page {
 			position: relative;
 			z-index: 10;
-			min-height: 100vh;
+			height: 100dvh;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			padding: 3rem 1.5rem 4rem;
+			padding: 4rem 1rem 0.5rem;
 		}
 
 		/* ---------- Header ---------- */
@@ -79,7 +79,7 @@
 			flex-direction: column;
 			align-items: flex-start;
 			text-align: left;
-			margin-bottom: 2.25rem;
+			margin-bottom: 0.5rem;
 		}
 
 		.back-link-fixed {
@@ -172,9 +172,13 @@
 			backdrop-filter: var(--glass-blur);
 			-webkit-backdrop-filter: var(--glass-blur);
 			box-shadow: var(--glass-inset), var(--glass-shadow);
-			padding: 1.25rem;
+			padding: 0.5rem;
 			opacity: 0;
 			animation: card-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 420ms forwards;
+			flex: 1;
+			min-height: 0;
+			display: flex;
+			flex-direction: column;
 		}
 
 		.game-stage {
@@ -182,11 +186,12 @@
 			width: 100%;
 			max-width: 960px;
 			margin: 0 auto;
-			aspect-ratio: 16 / 9;
 			border-radius: 12px;
 			overflow: hidden;
 			background: rgba(2, 4, 16, 0.72);
 			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+			flex: 1;
+			min-height: 0;
 		}
 
 		#canvas {
@@ -374,6 +379,13 @@
 				transform: none;
 			}
 			.header-rule { transform: scaleX(1); }
+		}
+
+		@media (max-width: 768px) {
+			.page { padding: 4rem 0.5rem 0.25rem; }
+			.game-title { font-size: 1.75rem; }
+			.game-subline { font-size: 0.7rem; }
+			.game-shell { padding: 0.4rem; }
 		}
 
 		/* Godot game styles */
@@ -768,6 +780,7 @@
 		});
 
 //]]></script>
+<script src="/js/ui-settings.js"></script>
 </body>
 </html>
 

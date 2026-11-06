@@ -9,6 +9,35 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/showcase/showcase.css">
 <style>
+  html, body {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .page {
+    padding: 4rem 1rem 0.5rem;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+  }
+
+  .page-subline {
+    font-size: 0.8rem;
+  }
+
+  .header-rule {
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
   .game-shell {
     position: relative;
     width: 100%;
@@ -20,10 +49,43 @@
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-inset), var(--glass-shadow);
-    padding: 0.75rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    flex: 1;
+    min-height: 0;
+  }
+  .game-shell-header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  .control-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: rgba(9, 13, 38, 0.72);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-inset);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--ink-dim);
+    transition: all 200ms ease;
+    padding: 0;
+    font: inherit;
+  }
+  .control-btn:hover {
+    color: #fff;
+    border-color: var(--line-strong);
+    background: var(--glass-hover);
+  }
+  .control-btn svg {
+    width: 16px;
+    height: 16px;
   }
   .game-stage {
     position: relative;
@@ -31,10 +93,11 @@
     width: 100%;
     max-width: 1050px;
     margin: 0 auto;
-    aspect-ratio: 16 / 9;
     border-radius: 12px;
     overflow: hidden;
     background: rgba(2, 4, 16, 0.72);
+    min-height: 0;
+    aspect-ratio: 16 / 9;
   }
   .game-stage iframe {
     position: absolute;
@@ -43,10 +106,18 @@
     height: 100%;
     border: 0;
     display: block;
-    background: #000;
+    background: #080A2B;
+  }
+
+  /* Inject styles into the iframe to override game styling */
+  #gd-style-injector {
+    display: none;
   }
   @media (max-width: 640px) {
-    .page { padding: 4.5rem 0.75rem 0.75rem; }
+    .page { padding: 0.75rem 0.5rem 0.25rem; }
+    .page-title { font-size: 1.75rem; }
+    .page-subline { font-size: 0.7rem; }
+    .game-shell { padding: 0.4rem; }
   }
 </style>
 </head>
@@ -70,19 +141,76 @@
     <div class="header-rule" aria-hidden="true"></div>
 
     <div class="game-shell">
-      <div class="game-stage">
-        <iframe src="/geometry-dash/game.html" title="Geometry Dash" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+      <div class="game-shell-header">
+        <button class="control-btn" id="fullscreenBtn" type="button" aria-label="Volledig scherm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+      <div class="game-stage" id="game-stage">
+        <iframe src="/geometry-dash/game.html" title="Geometry Dash" allow="fullscreen; autoplay; gamepad; clipboard-read; clipboard-write" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-pointer-lock allow-top-navigation"></iframe>
       </div>
     </div>
   </div>
 
-  <script src="/geometry-dash/starfield.js" defer></script>
+  <script src="/starfield.js" defer></script>
   <script>
+    // Save state when leaving
+    function savePageState() {
+      try {
+        const state = {
+          lastVisit: Date.now(),
+          lastUrl: window.location.href
+        };
+        localStorage.setItem('dub5:geometry-dash:state', JSON.stringify(state));
+      } catch (e) {
+        console.error('Failed to save page state:', e);
+      }
+    }
+
+    // Restore state on load
+    function loadPageState() {
+      try {
+        const saved = localStorage.getItem('dub5:geometry-dash:state');
+        if (saved) {
+          const state = JSON.parse(saved);
+          console.log('Restored state from:', new Date(state.lastVisit));
+        }
+      } catch (e) {
+        console.error('Failed to load page state:', e);
+      }
+    }
+
+    // Fullscreen toggle
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const gameStage = document.getElementById('game-stage');
+    if (fullscreenBtn && gameStage) {
+      fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          gameStage.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
       });
     }
+
+    // Save state on page unload and back button click
+    window.addEventListener('beforeunload', savePageState);
+    document.querySelector('.back-link-fixed').addEventListener('click', savePageState);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) savePageState();
+    });
+
+    // Load state on page load
+    window.addEventListener('DOMContentLoaded', loadPageState);
   </script>
+<script src="/js/ui-settings.js"></script>
 </body>
 </html>

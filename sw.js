@@ -1,7 +1,7 @@
 // Service Worker for DUB5 PWA
 // Update this version on each deployment to force cache refresh
 const CACHE_VERSION = '1.0.0';
-const CACHE_BUILD = '018'; // Increment this on each build
+const CACHE_BUILD = '022'; // Increment this on each build
 const CACHE_NAME = `dub5-v${CACHE_VERSION}.${CACHE_BUILD}`;
 const APP_SHELL = [
   '/',
@@ -122,7 +122,44 @@ self.addEventListener('fetch', (event) => {
 
   // Page navigations - network first so routes always serve fresh HTML,
   // cache only as offline fallback
-  if (request.mode === 'navigate') {
+  // Skip ALL game routes to avoid serving cached homepage
+  if (request.mode === 'navigate' &&
+      !url.pathname.startsWith('/snake') &&
+      !url.pathname.startsWith('/minesweeper') &&
+      !url.pathname.startsWith('/blockblast') &&
+      !url.pathname.startsWith('/rekenmachine') &&
+      !url.pathname.startsWith('/2048') &&
+      !url.pathname.startsWith('/tetris') &&
+      !url.pathname.startsWith('/memory') &&
+      !url.pathname.startsWith('/flappy') &&
+      !url.pathname.startsWith('/pong') &&
+      !url.pathname.startsWith('/sudoku') &&
+      !url.pathname.startsWith('/gnomelauncher') &&
+      !url.pathname.startsWith('/breakout') &&
+      !url.pathname.startsWith('/baseball') &&
+      !url.pathname.startsWith('/liquid-soccer') &&
+      !url.pathname.startsWith('/stacktris') &&
+      !url.pathname.startsWith('/block-blast') &&
+      !url.pathname.startsWith('/subway-surfers') &&
+      !url.pathname.startsWith('/geometry-dash') &&
+      !url.pathname.startsWith('/nsmbw-web-port') &&
+      !url.pathname.startsWith('/SM64-PC-Port-WebGL') &&
+      !url.pathname.startsWith('/minecraft') &&
+      !url.pathname.startsWith('/skate3') &&
+      !url.pathname.startsWith('/gta-vice-city') &&
+      !url.pathname.startsWith('/simpsons-hit-and-run') &&
+      !url.pathname.startsWith('/skate-rust') &&
+      !url.pathname.startsWith('/cs-surf') &&
+      !url.pathname.startsWith('/halo-ce') &&
+      !url.pathname.startsWith('/halo-ce-mobile') &&
+      !url.pathname.startsWith('/pes6') &&
+      !url.pathname.startsWith('/bo1-zombies') &&
+      !url.pathname.startsWith('/moon-zombies') &&
+      !url.pathname.startsWith('/kino-der-toten') &&
+      !url.pathname.startsWith('/bo3-cheese-cube') &&
+      !url.pathname.startsWith('/bo2') &&
+      !url.pathname.startsWith('/mw2') &&
+      !url.pathname.startsWith('/gta5')) {
     event.respondWith(
       fetch(request).then((response) => {
         if (response.ok) {
@@ -227,11 +264,29 @@ self.addEventListener('fetch', (event) => {
 
   // Geometry Dash payload chunks (hundreds of MB) are cached by the game's
   // own CacheStorage layer - don't intercept those. Everything else under
-  // /geometry-dash/ (page, engine, manifest) is cached on first play.
+  // /geometry-dash/ (page, engine, manifest) uses network first to allow
+  // online levels to be accessed, with cache as offline fallback.
   if (url.pathname.startsWith('/geometry-dash/payload/')) {
     return;
   }
   if (url.pathname.startsWith('/geometry-dash/')) {
+    event.respondWith(
+      fetch(request).then((response) => {
+        if (response.ok) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseToCache);
+          });
+        }
+        return response;
+      }).catch(() => {
+        return caches.match(request).then((response) => {
+          return response || caches.match('/offline.html');
+        });
+      })
+    );
+    return;
+  }
 
   // Subway Surfers game assets - cache on first play
   if (url.pathname.startsWith('/subway-surfers/')) {

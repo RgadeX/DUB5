@@ -11,12 +11,16 @@
 <link rel="stylesheet" href="../showcase/showcase.css">
 <style>
   /* Snake-specific styles */
+  html, body {
+    overflow: hidden;
+    height: 100%;
+  }
+
   .page {
-    padding: 1.5rem 1.5rem 1rem;
-    min-height: 100vh;
+    padding: 4rem 1rem 0.5rem;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
   }
 
   .page-header {
@@ -24,15 +28,16 @@
   }
 
   .page-title {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
 
   .page-subline {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   .header-rule {
     margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .game-shell {
@@ -46,10 +51,12 @@
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-inset), var(--glass-shadow);
-    padding: 0.75rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    flex: 1;
+    min-height: 0;
   }
 
   .game-shell-header {
@@ -112,7 +119,8 @@
     border-radius: 12px;
     overflow: hidden;
     background: rgba(2, 4, 16, 0.72);
-    aspect-ratio: 4 / 3;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
   }
 
   #game-canvas {
@@ -317,8 +325,10 @@
   }
 
   @media (max-width: 768px) {
-    .page { padding: 1rem 1rem 0.75rem; }
-    .page-title { font-size: 2rem; }
+    .page { padding: 0.75rem 0.5rem 0.25rem; }
+    .page-title { font-size: 1.75rem; }
+    .page-subline { font-size: 0.7rem; }
+    .game-shell { padding: 0.4rem; }
     .settings-grid { grid-template-columns: 1fr; }
     .overlay-scroll { padding: 0.85rem 0.85rem 0.5rem; }
     .overlay-actions { padding: 0.5rem 0.85rem 0.65rem; }
@@ -349,11 +359,19 @@
         <div class="hud" id="hud" aria-live="polite">
           <div class="hud-item">Score<strong id="hudScore">0</strong></div>
         </div>
-        <button class="fullscreen-btn" id="fullscreenBtn" type="button" aria-label="Volledig scherm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-          </svg>
-        </button>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="fullscreen-btn" id="homeBtn" type="button" aria-label="Home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </button>
+          <button class="fullscreen-btn" id="fullscreenBtn" type="button" aria-label="Volledig scherm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="game-stage">
@@ -384,7 +402,6 @@
       </div>
     </div>
 
-    <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
   </div>
 
 <script src="../showcase/showcase.js"></script>
@@ -404,7 +421,11 @@ const GAME_CONFIG = {
   speed: 16,
   baseZoom: 1,
   zoomDecreasePerFruit: 0.05,
-  segmentsPerFruit: 5
+  segmentsPerFruit: 5,
+  zoomBehavior: 'dynamic',
+  fruitMode: 'single',
+  gridSize: 24,
+  controlMode: 'keyboard'
 };
 
 let snake = [];
@@ -412,6 +433,7 @@ let direction = { x: 1, y: 0 };
 let nextDirection = { x: 1, y: 0 };
 let directionQueue = [];
 let fruit = { x: 0, y: 0 };
+let fruits = [];
 let score = 0;
 let gameLoop = null;
 let isPlaying = false;
@@ -428,12 +450,18 @@ function saveGameState() {
       nextDirection: nextDirection,
       directionQueue: directionQueue,
       fruit: fruit,
+      fruits: fruits,
       score: score,
       snakeColor: GAME_CONFIG.snakeColor,
       speed: GAME_CONFIG.speed,
       zoomScale: zoomScale,
-      growthCounter: growthCounter
+      growthCounter: growthCounter,
+      isPlaying: isPlaying,
+      zoomBehavior: GAME_CONFIG.zoomBehavior,
+      fruitMode: GAME_CONFIG.fruitMode,
+      controlMode: GAME_CONFIG.controlMode
     };
+    console.log('Saving game state:', state);
     localStorage.setItem('dub5:snake:gamestate', JSON.stringify(state));
   } catch (e) {
     console.error('Failed to save game state:', e);
@@ -445,6 +473,7 @@ function loadGameState() {
     const saved = localStorage.getItem('dub5:snake:gamestate');
     if (saved) {
       const state = JSON.parse(saved);
+      console.log('Loaded game state:', state);
       return state;
     }
   } catch (e) {
@@ -464,17 +493,23 @@ function clearGameState() {
 function initCanvas() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const rect = canvas.getBoundingClientRect();
-  
+
   canvas.width = Math.floor(rect.width * dpr);
   canvas.height = Math.floor(rect.height * dpr);
-  
+
   ctx.scale(dpr, dpr);
-  
+
   canvasWidth = rect.width;
   canvasHeight = rect.height;
 }
 
 function updateZoom() {
+  // Only zoom if dynamic zoom is enabled
+  if (GAME_CONFIG.zoomBehavior === 'fixed') {
+    zoomScale = GAME_CONFIG.baseZoom;
+    return;
+  }
+
   // Calculate zoom based on fruits eaten
   const fruitsEaten = Math.floor((snake.length - 3) / GAME_CONFIG.segmentsPerFruit);
   const zoomDecrease = fruitsEaten * GAME_CONFIG.zoomDecreasePerFruit;
@@ -484,23 +519,27 @@ function updateZoom() {
 function spawnFruit() {
   const margin = GAME_CONFIG.fruitRadius * 2;
   const minDistance = GAME_CONFIG.snakeRadius + GAME_CONFIG.fruitRadius + 10;
-  
+
   let attempts = 0;
   let validPosition = false;
   let newFruit;
-  
+
   // Spawn in the middle 50% of the canvas area
   const middleAreaWidth = canvasWidth * 0.5;
   const middleAreaHeight = canvasHeight * 0.5;
   const startX = (canvasWidth - middleAreaWidth) / 2;
   const startY = (canvasHeight - middleAreaHeight) / 2;
-  
+
   while (!validPosition && attempts < 100) {
+    // Snap to grid
+    const gridX = Math.floor((Math.random() * middleAreaWidth + startX) / GAME_CONFIG.gridSize) * GAME_CONFIG.gridSize + GAME_CONFIG.gridSize / 2;
+    const gridY = Math.floor((Math.random() * middleAreaHeight + startY) / GAME_CONFIG.gridSize) * GAME_CONFIG.gridSize + GAME_CONFIG.gridSize / 2;
+
     newFruit = {
-      x: startX + margin + Math.random() * (middleAreaWidth - margin * 2),
-      y: startY + margin + Math.random() * (middleAreaHeight - margin * 2)
+      x: gridX,
+      y: gridY
     };
-    
+
     // Check if position overlaps with snake body
     validPosition = true;
     for (const segment of snake) {
@@ -510,51 +549,71 @@ function spawnFruit() {
         break;
       }
     }
-    
+
     attempts++;
   }
-  
-  fruit = newFruit;
+
+  if (GAME_CONFIG.fruitMode === 'single') {
+    fruit = newFruit;
+  } else {
+    fruits.push(newFruit);
+  }
+}
+
+function spawnMultipleFruits() {
+  // Spawn fruits in a grid pattern covering the entire playfield
+  fruits = [];
+  const gridSpacing = GAME_CONFIG.gridSize;
+  const margin = gridSpacing / 2;
+
+  for (let x = margin; x < canvasWidth - margin; x += gridSpacing) {
+    for (let y = margin; y < canvasHeight - margin; y += gridSpacing) {
+      fruits.push({ x: x, y: y });
+    }
+  }
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   // Apply zoom transform centered on canvas
   ctx.save();
   ctx.translate(canvasWidth / 2, canvasHeight / 2);
   ctx.scale(zoomScale, zoomScale);
   ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
-  
-  // Draw fruit with glass effect
-  const fruitX = fruit.x;
-  const fruitY = fruit.y;
-  const fruitRadius = GAME_CONFIG.fruitRadius;
-  
-  // Fruit glow
-  const fruitGlow = ctx.createRadialGradient(fruitX, fruitY, 0, fruitX, fruitY, fruitRadius * 2);
-  fruitGlow.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
-  fruitGlow.addColorStop(1, 'rgba(239, 68, 68, 0)');
-  ctx.fillStyle = fruitGlow;
-  ctx.beginPath();
-  ctx.arc(fruitX, fruitY, fruitRadius * 2, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Fruit body with gradient
-  const fruitGrad = ctx.createRadialGradient(fruitX - fruitRadius * 0.3, fruitY - fruitRadius * 0.3, 0, fruitX, fruitY, fruitRadius);
-  fruitGrad.addColorStop(0, '#fca5a5');
-  fruitGrad.addColorStop(0.5, '#ef4444');
-  fruitGrad.addColorStop(1, '#b91c1c');
-  ctx.fillStyle = fruitGrad;
-  ctx.beginPath();
-  ctx.arc(fruitX, fruitY, fruitRadius, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Fruit highlight
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.beginPath();
-  ctx.arc(fruitX - fruitRadius * 0.3, fruitY - fruitRadius * 0.3, fruitRadius * 0.25, 0, Math.PI * 2);
-  ctx.fill();
+
+  // Draw fruits
+  const fruitsToDraw = GAME_CONFIG.fruitMode === 'single' ? (fruit ? [fruit] : []) : fruits;
+  fruitsToDraw.forEach(f => {
+    const fruitX = f.x;
+    const fruitY = f.y;
+    const fruitRadius = GAME_CONFIG.fruitRadius;
+
+    // Fruit glow
+    const fruitGlow = ctx.createRadialGradient(fruitX, fruitY, 0, fruitX, fruitY, fruitRadius * 2);
+    fruitGlow.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+    fruitGlow.addColorStop(1, 'rgba(239, 68, 68, 0)');
+    ctx.fillStyle = fruitGlow;
+    ctx.beginPath();
+    ctx.arc(fruitX, fruitY, fruitRadius * 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Fruit body with gradient
+    const fruitGrad = ctx.createRadialGradient(fruitX - fruitRadius * 0.3, fruitY - fruitRadius * 0.3, 0, fruitX, fruitY, fruitRadius);
+    fruitGrad.addColorStop(0, '#fca5a5');
+    fruitGrad.addColorStop(0.5, '#ef4444');
+    fruitGrad.addColorStop(1, '#b91c1c');
+    ctx.fillStyle = fruitGrad;
+    ctx.beginPath();
+    ctx.arc(fruitX, fruitY, fruitRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Fruit highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(fruitX - fruitRadius * 0.3, fruitY - fruitRadius * 0.3, fruitRadius * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+  });
   
   // Draw snake with glassmorphism
   if (snake.length > 0) {
@@ -711,46 +770,87 @@ function darkenColor(hex, percent) {
 }
 
 function update() {
-  // Process direction queue for rapid movements
-  if (directionQueue.length > 0) {
+  // Process direction queue for rapid movements (keyboard control)
+  if (directionQueue.length > 0 && GAME_CONFIG.controlMode !== 'mouse') {
     direction = directionQueue.shift();
-  } else {
+  } else if (GAME_CONFIG.controlMode !== 'mouse') {
     direction = { ...nextDirection };
   }
-  
+
+  // Calculate movement distance based on control mode
+  let movementDistance;
+  if (GAME_CONFIG.controlMode === 'mouse') {
+    // Mouse control: smooth movement with smaller increments
+    movementDistance = GAME_CONFIG.snakeSpeed;
+  } else {
+    // Keyboard control: move exactly one grid cell per update for perfect grid alignment
+    movementDistance = GAME_CONFIG.gridSize;
+  }
+
   // Move head in current direction
   const head = {
-    x: snake[0].x + direction.x * GAME_CONFIG.snakeSpeed,
-    y: snake[0].y + direction.y * GAME_CONFIG.snakeSpeed
+    x: snake[0].x + direction.x * movementDistance,
+    y: snake[0].y + direction.y * movementDistance
   };
-  
+
+  // Snap to grid for keyboard control to ensure perfect grid alignment
+  if (GAME_CONFIG.controlMode !== 'mouse') {
+    head.x = Math.round(head.x / GAME_CONFIG.gridSize) * GAME_CONFIG.gridSize + GAME_CONFIG.gridSize / 2;
+    head.y = Math.round(head.y / GAME_CONFIG.gridSize) * GAME_CONFIG.gridSize + GAME_CONFIG.gridSize / 2;
+  }
+
   // Wrap around canvas walls (0 to canvasWidth, 0 to canvasHeight)
   if (head.x < 0) head.x = canvasWidth;
   if (head.x > canvasWidth) head.x = 0;
   if (head.y < 0) head.y = canvasHeight;
   if (head.y > canvasHeight) head.y = 0;
-  
+
   // No self-collision - snake can pass through its own body
-  
+
   snake.unshift(head);
   
-  // Check if snake ate fruit (distance check)
-  const distToFruit = Math.hypot(head.x - fruit.x, head.y - fruit.y);
-  if (distToFruit < GAME_CONFIG.snakeRadius + GAME_CONFIG.fruitRadius) {
-    score += 10;
-    spawnFruit();
-    updateZoom();
-    updateHUD();
-    saveGameState();
-    // Start growth - add segments per fruit
-    growthCounter = GAME_CONFIG.segmentsPerFruit;
+  // Check if snake ate fruit(s)
+  if (GAME_CONFIG.fruitMode === 'single') {
+    if (fruit) {
+      const distToFruit = Math.hypot(head.x - fruit.x, head.y - fruit.y);
+      if (distToFruit < GAME_CONFIG.snakeRadius + GAME_CONFIG.fruitRadius) {
+        score += 10;
+        spawnFruit();
+        updateZoom();
+        updateHUD();
+        saveGameState();
+        growthCounter = GAME_CONFIG.segmentsPerFruit;
+      }
+    }
+  } else {
+    // Multi fruit mode - check all fruits
+    for (let i = fruits.length - 1; i >= 0; i--) {
+      const distToFruit = Math.hypot(head.x - fruits[i].x, head.y - fruits[i].y);
+      if (distToFruit < GAME_CONFIG.snakeRadius + GAME_CONFIG.fruitRadius) {
+        score += 10;
+        // Respawn fruit instantly at the same position
+        fruits[i] = { x: fruits[i].x, y: fruits[i].y };
+        updateZoom();
+        updateHUD();
+        saveGameState();
+        // Add growth - less than before to prevent body getting too long
+        growthCounter += GAME_CONFIG.segmentsPerFruit;
+        break; // Only eat one fruit per frame
+      }
+    }
   }
   
   // Handle growth - don't pop tail while growing
   if (growthCounter > 0) {
     growthCounter--;
   } else {
-    snake.pop();
+    // Remove tail segments to maintain movement
+    const segmentsToRemove = GAME_CONFIG.fruitMode === 'multi' ? 3 : 1;
+    for (let i = 0; i < segmentsToRemove; i++) {
+      if (snake.length > 3) {
+        snake.pop();
+      }
+    }
   }
 }
 
@@ -772,27 +872,31 @@ function showOverlay(id, show) {
 function startGame() {
   // Clear old saved state (incompatible with new pixel-based system)
   clearGameState();
-  
+
   // Initialize zoom
   zoomScale = GAME_CONFIG.baseZoom;
   growthCounter = 0;
-  
-  // Start fresh game - position snake in center of canvas
-  const startX = canvasWidth / 2;
-  const startY = canvasHeight / 2;
-  const segmentSpacing = GAME_CONFIG.snakeRadius * 2;
-  
+
+  // Start fresh game - position snake in center of canvas, snapped to grid
+  const centerX = Math.round((canvasWidth / 2) / GAME_CONFIG.gridSize) * GAME_CONFIG.gridSize + GAME_CONFIG.gridSize / 2;
+  const centerY = Math.round((canvasHeight / 2) / GAME_CONFIG.gridSize) * GAME_CONFIG.gridSize + GAME_CONFIG.gridSize / 2;
+
   snake = [
-    { x: startX, y: startY },
-    { x: startX - segmentSpacing, y: startY },
-    { x: startX - segmentSpacing * 2, y: startY }
+    { x: centerX, y: centerY },
+    { x: centerX - GAME_CONFIG.gridSize, y: centerY },
+    { x: centerX - GAME_CONFIG.gridSize * 2, y: centerY }
   ];
   direction = { x: 1, y: 0 };
   nextDirection = { x: 1, y: 0 };
   directionQueue = [];
   score = 0;
-  
-  spawnFruit();
+  fruits = [];
+
+  if (GAME_CONFIG.fruitMode === 'multi') {
+    spawnMultipleFruits();
+  } else {
+    spawnFruit();
+  }
   
   updateHUD();
   
@@ -805,6 +909,16 @@ function startGame() {
     update();
     draw();
   }, GAME_CONFIG.speed);
+}
+
+function updateGameSpeed() {
+  if (gameLoop) {
+    clearInterval(gameLoop);
+    gameLoop = setInterval(() => {
+      update();
+      draw();
+    }, GAME_CONFIG.speed);
+  }
 }
 
 const SETTINGS = [
@@ -828,48 +942,97 @@ const SETTINGS = [
       { value: 12, label: 'Snel' },
       { value: 8, label: 'Bliksem' }
     ]
+  },
+  {
+    key: 'zoomBehavior',
+    label: 'Zoom',
+    options: [
+      { value: 'dynamic', label: 'Dynamisch' },
+      { value: 'fixed', label: 'Vast' }
+    ]
+  },
+  {
+    key: 'fruitMode',
+    label: 'Appels',
+    options: [
+      { value: 'single', label: 'Enkel' },
+      { value: 'multi', label: 'Vol' }
+    ]
+  },
+  {
+    key: 'controlMode',
+    label: 'Bediening',
+    options: [
+      { value: 'keyboard', label: 'Pijltjes' },
+      { value: 'mouse', label: 'Muis' }
+    ]
   }
 ];
 
 function buildSettingsUI() {
   const grid = document.getElementById('settingsGrid');
   grid.innerHTML = '';
-  
+
   SETTINGS.forEach(group => {
     const groupEl = document.createElement('div');
     groupEl.className = 'settings-group';
-    
+
     const labelEl = document.createElement('span');
     labelEl.className = 'settings-label';
     labelEl.textContent = group.label;
     groupEl.appendChild(labelEl);
-    
+
     const rowEl = document.createElement('div');
     rowEl.className = 'option-row';
-    
+
     group.options.forEach(opt => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'option';
       btn.dataset.value = String(opt.value);
+      btn.dataset.key = group.key;
       btn.innerHTML = '<span class="option-label">' + opt.label + '</span>';
-      
-      const currentVal = document.getElementById('game-canvas').dataset[group.key] || SETTINGS[0].options[0].value;
-      if (String(opt.value) === currentVal) {
+
+      const currentVal = GAME_CONFIG[group.key] || SETTINGS[0].options[0].value;
+      if (String(opt.value) === String(currentVal)) {
         btn.classList.add('is-active');
       }
-      
+
       btn.addEventListener('click', () => {
-        document.getElementById('game-canvas').dataset[group.key] = opt.value;
         GAME_CONFIG[group.key] = opt.value;
         rowEl.querySelectorAll('.option').forEach(b => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         saveGameState();
+
+        // If zoom behavior changed, update zoom immediately
+        if (group.key === 'zoomBehavior') {
+          updateZoom();
+        }
+
+        // If control mode changed, clear direction queue for clean transition
+        if (group.key === 'controlMode') {
+          directionQueue = [];
+        }
+
+        // If fruit mode changed, respawn fruits
+        if (group.key === 'fruitMode' && isPlaying) {
+          if (GAME_CONFIG.fruitMode === 'multi') {
+            spawnMultipleFruits();
+          } else {
+            fruits = [];
+            spawnFruit();
+          }
+        }
+
+        // If speed changed, update game loop interval
+        if (group.key === 'speed' && isPlaying) {
+          updateGameSpeed();
+        }
       });
-      
+
       rowEl.appendChild(btn);
     });
-    
+
     groupEl.appendChild(rowEl);
     grid.appendChild(groupEl);
   });
@@ -888,39 +1051,62 @@ const KEY_DIRS = {
 
 function trySetDir(d) {
   if (!isPlaying) return;
-  
-  // Don't allow 180-degree turns (can't go opposite direction)
-  if (snake.length > 0) {
-    const lastDir = directionQueue.length > 0 
-      ? directionQueue[directionQueue.length - 1] 
-      : direction;
-    if (lastDir.x === -d.x && lastDir.y === -d.y) return;
-  }
-  
+
   // Add to queue for rapid movements - allow rapid key presses
   directionQueue.push(d);
-  
+
   // Limit queue size to prevent huge delays
   if (directionQueue.length > 3) {
     directionQueue.shift();
   }
-  
+
   // Also update nextDirection for backward compatibility
   nextDirection = d;
 }
 
 document.addEventListener('keydown', (e) => {
   if (!isPlaying) return;
-  
+
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   const d = KEY_DIRS[k];
   if (d) {
+    // Only process keyboard input if not in mouse control mode
+    if (GAME_CONFIG.controlMode === 'mouse') {
+      return; // Ignore arrow keys when mouse control is active
+    }
     e.preventDefault();
     trySetDir(d);
   }
 });
 
 let touchStartX = 0, touchStartY = 0;
+
+// Mouse control - snake follows cursor (only when enabled via settings)
+canvas.addEventListener('mousemove', (e) => {
+  if (!isPlaying || GAME_CONFIG.controlMode !== 'mouse') return;
+
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+
+  // Convert to canvas coordinates
+  const canvasMouseX = (mouseX / rect.width) * canvasWidth;
+  const canvasMouseY = (mouseY / rect.height) * canvasHeight;
+
+  // Calculate direction from head to mouse
+  const head = snake[0];
+  const dx = canvasMouseX - head.x;
+  const dy = canvasMouseY - head.y;
+
+  // Normalize and set direction
+  const distance = Math.hypot(dx, dy);
+  if (distance > 0) {
+    direction = {
+      x: dx / distance,
+      y: dy / distance
+    };
+  }
+});
 
 canvas.addEventListener('touchstart', (e) => {
   if (!isPlaying) return;
@@ -950,10 +1136,57 @@ window.addEventListener('DOMContentLoaded', () => {
   initCanvas();
   buildSettingsUI();
   draw();
-  
+
+  // Try to load and restore saved game state
+  const savedState = loadGameState();
+  if (savedState && savedState.isPlaying) {
+    // Restore the saved game state
+    snake = savedState.snake;
+    direction = savedState.direction;
+    nextDirection = savedState.nextDirection;
+    directionQueue = savedState.directionQueue || [];
+    score = savedState.score;
+    GAME_CONFIG.speed = savedState.speed;
+    GAME_CONFIG.snakeColor = savedState.snakeColor;
+    GAME_CONFIG.zoomBehavior = savedState.zoomBehavior || 'dynamic';
+    GAME_CONFIG.fruitMode = savedState.fruitMode || 'single';
+    GAME_CONFIG.controlMode = savedState.controlMode || 'keyboard';
+    zoomScale = savedState.zoomScale;
+    growthCounter = savedState.growthCounter;
+    isPlaying = true;
+
+    // Rebuild settings UI to reflect loaded state
+    buildSettingsUI();
+
+    // Restore fruits
+    if (GAME_CONFIG.fruitMode === 'multi') {
+      if (savedState.fruits && savedState.fruits.length > 0) {
+        fruits = savedState.fruits;
+      } else {
+        spawnMultipleFruits();
+      }
+    } else {
+      fruits = [];
+      if (savedState.fruit) {
+        fruit = savedState.fruit;
+      } else {
+        spawnFruit();
+      }
+    }
+    
+    // Hide overlay and start game loop
+    showOverlay('settingsOverlay', false);
+    document.getElementById('hud').classList.add('is-visible');
+    updateHUD();
+    gameLoop = setInterval(() => {
+      update();
+      draw();
+    }, GAME_CONFIG.speed);
+  }
+
   document.getElementById('startBtn').addEventListener('click', startGame);
   document.getElementById('retryBtn').addEventListener('click', startGame);
-  
+
   const fullscreenBtn = document.getElementById('fullscreenBtn');
   if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', () => {
@@ -964,13 +1197,26 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
+  const homeBtn = document.getElementById('homeBtn');
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      isPlaying = false;
+      clearInterval(gameLoop);
+      showOverlay('settingsOverlay', true);
+      showOverlay('gameOverOverlay', false);
+      document.getElementById('hud').classList.remove('is-visible');
+      clearGameState();
+    });
+  }
+
   document.getElementById('settingsBtn').addEventListener('click', () => {
     isPlaying = false;
     clearInterval(gameLoop);
     snake = [];
     score = 0;
     directionQueue = [];
+    fruits = [];
     clearGameState();
     document.getElementById('hud').classList.remove('is-visible');
     showOverlay('gameOverOverlay', false);
@@ -994,9 +1240,10 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   
   // Save game state when clicking the back button
-  document.querySelector('.back-link-fixed').addEventListener('click', () => {
+  document.querySelector('.back-link-fixed').addEventListener('click', (e) => {
     if (isPlaying) {
       saveGameState();
+      console.log('Saved state on back button click');
     }
   });
   
@@ -1017,5 +1264,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script src="/js/ui-settings.js"></script>
 </body>
 </html>

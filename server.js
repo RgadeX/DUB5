@@ -264,6 +264,80 @@ app.get('/blogs/content-format', (req, res) => {
   res.download(path.join(__dirname, 'content', 'research', 'CONTENT-FORMAT.md'));
 });
 
+// Mario games routes
+app.get('/nsmbw-web-port', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'nsmbw-web-port', 'index.html'));
+});
+
+app.get('/SM64-PC-Port-WebGL', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'SM64-PC-Port-WebGL', 'index.html'));
+});
+
+// New original game routes
+app.get('/minecraft', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'minecraft', 'index.html'));
+});
+
+app.get('/skate3', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'skate3', 'index.html'));
+});
+
+app.get('/gta-vice-city', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'gta-vice-city', 'index.html'));
+});
+
+app.get('/simpsons-hit-and-run', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'simpsons-hit-and-run', 'index.html'));
+});
+
+app.get('/skate-rust', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'skate-rust', 'index.html'));
+});
+
+app.get('/cs-surf', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'cs-surf', 'index.html'));
+});
+
+app.get('/halo-ce', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'halo-ce', 'index.html'));
+});
+
+app.get('/halo-ce-mobile', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'halo-ce-mobile', 'index.html'));
+});
+
+app.get('/pes6', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'pes6', 'index.html'));
+});
+
+app.get('/bo1-zombies', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'bo1-zombies', 'index.html'));
+});
+
+app.get('/moon-zombies', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'moon-zombies', 'index.html'));
+});
+
+app.get('/kino-der-toten', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'kino-der-toten', 'index.html'));
+});
+
+app.get('/bo3-cheese-cube', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'bo3-cheese-cube', 'index.html'));
+});
+
+app.get('/bo2', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'bo2', 'index.html'));
+});
+
+app.get('/mw2', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'mw2', 'index.html'));
+});
+
+app.get('/gta5', (req, res) => {
+  res.sendFile(path.join(__dirname, 'games', 'gta5', 'index.html'));
+});
+
 // Serve static assets for showcase (must be before the route)
 app.use('/showcase', express.static(path.join(__dirname, 'showcase')));
 
@@ -278,7 +352,7 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`DUB5 running at http://localhost:${PORT}`);
-  console.log(`Games: /snake, /minesweeper, /blockblast, /rekenmachine, /2048, /tetris, /memory, /flappy, /pong, /sudoku, /gnomelauncher, /breakout, /baseball, /liquid-soccer, /cijferkaart`);
+  console.log(`Games: /snake, /minesweeper, /blockblast, /rekenmachine, /2048, /tetris, /memory, /flappy, /pong, /sudoku, /gnomelauncher, /breakout, /baseball, /liquid-soccer, /stacktris, /block-blast, /subway-surfers, /geometry-dash, /nsmbw-web-port, /SM64-PC-Port-WebGL, /minecraft, /skate3, /gta-vice-city, /simpsons-hit-and-run, /skate-rust, /cs-surf, /halo-ce, /halo-ce-mobile, /pes6, /bo1-zombies, /moon-zombies, /kino-der-toten, /bo3-cheese-cube, /bo2, /mw2, /gta5, /cijferkaart`);
   console.log(`Tools: /tools, /kleurenkiezer, /qr-generator, /wachtwoord, /tekst, /eenheden, /numworks, /cijferkaart`);
   console.log(`Study: /biologie, /study-tools, /leerplatform, /woordenlijst, /flashcards, /oefentoetsen, /samenvattingen`);
   console.log(`Hacks: /blooket-hacks, /alle-hacks, /kahoot-hacks, /quizlet-hacks, /gimkit-hacks`);

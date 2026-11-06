@@ -12,18 +12,22 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../showcase/showcase.css">
 <style>
+  html, body {
+    overflow: hidden;
+    height: 100%;
+  }
+
   .page {
-    padding: 1.5rem 1.5rem 1rem;
-    min-height: 100vh;
+    padding: 4rem 1rem 0.5rem;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
   }
 
   .page-header { margin-bottom: 0.5rem; }
-  .page-title { font-size: 3rem; }
-  .page-subline { font-size: 0.85rem; }
-  .header-rule { margin-top: 0.5rem; }
+  .page-title { font-size: 2.5rem; }
+  .page-subline { font-size: 0.8rem; }
+  .header-rule { margin-top: 0.5rem; margin-bottom: 0.75rem; }
 
   .game-shell {
     position: relative;
@@ -36,17 +40,23 @@
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-inset), var(--glass-shadow);
-    padding: 0.75rem;
+    padding: 0.5rem;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .game-stage {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4;
     border-radius: 12px;
     overflow: hidden;
     background: #000;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
   }
 
   #canvas_border {
@@ -155,23 +165,16 @@
   /* Modal (required by engine, kept hidden) */
   #modal_parent { display: none; }
 
-  .page-footer {
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-    color: var(--ink-dim);
-    text-align: center;
-    opacity: 0;
-    animation: fade-in 700ms ease-out 620ms forwards;
-  }
-
   @media (max-width: 768px) {
-    .page { padding: 1rem 1rem 0.75rem; }
-    .page-title { font-size: 2rem; }
-    .game-shell { padding: 0.6rem; }
+    .page { padding: 0.75rem 0.5rem 0.25rem; }
+    .page-title { font-size: 1.75rem; }
+    .page-subline { font-size: 0.7rem; }
+    .game-shell { padding: 0.4rem; }
   }
 </style>
 </head>
 <body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
   <a class="back-link-fixed" href="/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5"/>
@@ -216,8 +219,6 @@
         </div>
       </div>
     </div>
-
-    <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
   </div>
 
   <!-- Stars canvas must stay AFTER the game canvas: the engine resolves
@@ -247,6 +248,42 @@ if (fullscreenBtn) {
   });
 }
 
+// Dynamically adjust aspect ratio based on canvas dimensions
+const gameStage = document.getElementById('game-stage');
+const canvas = document.getElementById('canvas');
+
+function updateAspectRatio() {
+  if (canvas && gameStage) {
+    const width = canvas.width;
+    const height = canvas.height;
+    if (width > 0 && height > 0) {
+      const ratio = width / height;
+      gameStage.style.aspectRatio = `${width} / ${height}`;
+    }
+  }
+}
+
+// Monitor canvas size changes
+if (canvas && gameStage) {
+  const observer = new MutationObserver(updateAspectRatio);
+  observer.observe(canvas, { attributes: true, attributeFilter: ['width', 'height'] });
+
+  // Also check periodically during loading
+  let checkInterval = setInterval(() => {
+    updateAspectRatio();
+    // Stop checking once game appears to be loaded
+    if (canvas.width > 0 && canvas.height > 0) {
+      clearInterval(checkInterval);
+    }
+  }, 500);
+
+  // Final check after a longer delay
+  setTimeout(() => {
+    clearInterval(checkInterval);
+    updateAspectRatio();
+  }, 5000);
+}
+
 // Keep canvas sized to the stage when the window resizes
 window.addEventListener('load', () => {
   const stage = document.getElementById('game-stage');
@@ -261,5 +298,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script src="/starfield.js" defer></script>
+<script src="/js/ui-settings.js"></script>
 </body>
 </html>

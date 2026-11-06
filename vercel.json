@@ -185,8 +185,76 @@
       "dest": "/games/geometry-dash/$1"
     },
     {
-      "src": "/fonts/(.*)",
-      "dest": "/games/geometry-dash/fonts/$1"
+      "src": "/nsmbw-web-port",
+      "dest": "/games/nsmbw-web-port/index.html"
+    },
+    {
+      "src": "/SM64-PC-Port-WebGL",
+      "dest": "/games/SM64-PC-Port-WebGL/index.html"
+    },
+    {
+      "src": "/minecraft",
+      "dest": "/games/minecraft/index.html"
+    },
+    {
+      "src": "/skate3",
+      "dest": "/games/skate3/index.html"
+    },
+    {
+      "src": "/gta-vice-city",
+      "dest": "/games/gta-vice-city/index.html"
+    },
+    {
+      "src": "/simpsons-hit-and-run",
+      "dest": "/games/simpsons-hit-and-run/index.html"
+    },
+    {
+      "src": "/skate-rust",
+      "dest": "/games/skate-rust/index.html"
+    },
+    {
+      "src": "/cs-surf",
+      "dest": "/games/cs-surf/index.html"
+    },
+    {
+      "src": "/halo-ce",
+      "dest": "/games/halo-ce/index.html"
+    },
+    {
+      "src": "/halo-ce-mobile",
+      "dest": "/games/halo-ce-mobile/index.html"
+    },
+    {
+      "src": "/pes6",
+      "dest": "/games/pes6/index.html"
+    },
+    {
+      "src": "/bo1-zombies",
+      "dest": "/games/bo1-zombies/index.html"
+    },
+    {
+      "src": "/moon-zombies",
+      "dest": "/games/moon-zombies/index.html"
+    },
+    {
+      "src": "/kino-der-toten",
+      "dest": "/games/kino-der-toten/index.html"
+    },
+    {
+      "src": "/bo3-cheese-cube",
+      "dest": "/games/bo3-cheese-cube/index.html"
+    },
+    {
+      "src": "/bo2",
+      "dest": "/games/bo2/index.html"
+    },
+    {
+      "src": "/mw2",
+      "dest": "/games/mw2/index.html"
+    },
+    {
+      "src": "/gta5",
+      "dest": "/games/gta5/index.html"
     },
     {
       "src": "/(.*)",
@@ -200,10 +268,6 @@
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
         },
         {
           "key": "X-XSS-Protection",

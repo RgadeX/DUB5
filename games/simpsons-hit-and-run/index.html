@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Simpsons: Hit & Run - DUB5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/showcase/showcase.css">
+  <style>
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .page {
+      padding: 4rem 1rem 0.5rem;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-header {
+      margin-bottom: 0.5rem;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+    }
+
+    .page-subline {
+      font-size: 0.8rem;
+    }
+
+    .header-rule {
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .game-shell {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--glass);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-inset), var(--glass-shadow);
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .game-shell-header {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .control-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(9, 13, 38, 0.72);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-inset);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--ink-dim);
+      transition: all 200ms ease;
+      padding: 0;
+      font: inherit;
+    }
+
+    .control-btn:hover {
+      color: #fff;
+      border-color: var(--line-strong);
+      background: var(--glass-hover);
+    }
+
+    .control-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .game-stage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      max-width: 1050px;
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(2, 4, 16, 0.72);
+      min-height: 0;
+    }
+
+    .game-stage iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .back-link-fixed {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--line);
+      background: var(--glass);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      box-shadow: var(--glass-inset), var(--glass-shadow);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 200ms ease;
+    }
+
+    .back-link-fixed:hover {
+      color: #fff;
+      border-color: var(--line-strong);
+      background: var(--glass-hover);
+      transform: translateY(-1px);
+    }
+
+    .back-link-fixed svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .header-rule {
+      height: 1px;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0.5rem auto 0.75rem;
+      background: linear-gradient(
+        90deg,
+        rgba(190, 215, 255, 0) 0%,
+        rgba(190, 215, 255, 0.35) 12%,
+        rgba(214, 232, 255, 0.72) 50%,
+        rgba(190, 215, 255, 0.35) 88%,
+        rgba(190, 215, 255, 0) 100%
+      );
+    }
+
+    @media (max-width: 768px) {
+      .page { padding: 4rem 0.5rem 0.25rem; }
+      .page-title { font-size: 1.75rem; }
+      .page-subline { font-size: 0.7rem; }
+      .game-shell { padding: 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
+  <a class="back-link-fixed" href="/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"/>
+      <path d="m12 19-7-7 7-7"/>
+    </svg>
+    Terug
+  </a>
+
+  <div class="page">
+    <header class="page-header">
+      <h1 class="page-title">The Simpsons: Hit & Run</h1>
+      <p class="page-subline">De Simpsons in een actievolle race-game.</p>
+    </header>
+
+    <div class="header-rule" aria-hidden="true"></div>
+
+    <div class="game-shell">
+      <div class="game-shell-header">
+        <button class="control-btn" id="fullscreenBtn" type="button" aria-label="Volledig scherm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+      <div class="game-stage">
+        <iframe src="https://shar-wasm.cjoseph.workers.dev/?skipmovie" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script src="/starfield.js" defer></script>
+  <script src="/js/game-shell.js"></script>
+<script src="/js/ui-settings.js"></script>
+</body>
+</html>

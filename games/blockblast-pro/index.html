@@ -273,7 +273,7 @@
 	}
 	
   /* ===== DUB5 shell overrides ===== */
-  html, body { height: auto; overflow-x: hidden; }
+  html, body { height: 100%; overflow: hidden; }
   body {
     position: relative !important;
     margin: 0;
@@ -293,16 +293,15 @@
     filter: blur(26px);
   }
   .page {
-    padding: 1.5rem 1.5rem 1rem;
-    min-height: 100vh;
+    padding: 4rem 1rem 0.5rem;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
   }
   .page-header { margin-bottom: 0.5rem; }
-  .page-title { font-size: 3rem; }
-  .page-subline { font-size: 0.85rem; }
-  .header-rule { margin-top: 0.5rem; }
+  .page-title { font-size: 2.5rem; }
+  .page-subline { font-size: 0.8rem; }
+  .header-rule { margin-top: 0.5rem; margin-bottom: 0.75rem; }
   .game-shell {
     position: relative;
     width: 100%;
@@ -314,7 +313,15 @@
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--glass-inset), var(--glass-shadow);
-    padding: 0.75rem;
+    padding: 0.5rem;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 16 / 9;
+  }
+  #app-container {
+    aspect-ratio: 16 / 9;
   }
   .game-shell-header {
     display: flex;
@@ -337,13 +344,35 @@
   .game-stage {
     position: relative;
     width: 100%;
-    aspect-ratio: 590 / 960;
-    max-height: 78vh;
+    max-width: 100%;
     margin: 0 auto;
     border-radius: 12px;
     overflow: hidden;
     background: #000;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    flex: 1;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+  .game-stage:fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0;
+    max-width: none;
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: unset;
+  }
+  .canvas-app-canvas-container {
+    position: absolute;
+    inset: 0;
+  }
+  #canvas {
+    width: 100% !important;
+    height: 100% !important;
   }
   .canvas-app-container {
     position: absolute !important;
@@ -356,20 +385,18 @@
   #canvas { width: 100% !important; height: 100% !important; }
   .buttons-background { display: none; }
   .loading-screen-container { background: rgba(1, 3, 15, 0.85); }
-  .page-footer {
-    margin-top: 0.75rem; font-size: 0.75rem; color: var(--ink-dim);
-    text-align: center; opacity: 0; animation: fade-in 700ms ease-out 620ms forwards;
-  }
   @media (max-width: 768px) {
-    .page { padding: 1rem 1rem 0.75rem; }
-    .page-title { font-size: 2rem; }
-    .game-shell { padding: 0.6rem; }
+    .page { padding: 4rem 0.5rem 0.25rem; }
+    .page-title { font-size: 1.75rem; }
+    .page-subline { font-size: 0.7rem; }
+    .game-shell { padding: 0.4rem; }
   }
 </style>
 <script type="text/javascript" src="poki-stub.js"></script>
 <script type="text/javascript" src="GameAnalytics.js"></script>
 </head>
 <body>
+  <canvas class="stars" id="stars" aria-hidden="true"></canvas>
   <a class="back-link-fixed" href="/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M19 12H5"/>
@@ -410,8 +437,6 @@
         </div>
       </div>
     </div>
-
-    <p class="page-footer">© 2026 DUB5. Alle rechten voorbehouden.</p>
   </div>
 
   <!-- Keep after the game canvas: engines that resolve input via
@@ -498,17 +523,36 @@
 		};
 	</script>
   <script>
-    // Fullscreen toggle (same behavior as snake page)
+    // Fullscreen toggle - only fullscreen the game stage
     const fullscreenBtn = document.getElementById('fullscreenBtn');
-    if (fullscreenBtn) {
+    const gameStage = document.getElementById('game-stage');
+    if (fullscreenBtn && gameStage) {
       fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+          gameStage.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
         } else {
           document.exitFullscreen();
         }
       });
     }
+
+    // Resize canvas to fill available viewport space without scrolling
+    function resizeCanvas() {
+      const gameStage = document.getElementById('game-stage');
+      const canvas = document.getElementById('canvas');
+      if (gameStage && canvas) {
+        const rect = gameStage.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+    }
+
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
+
+    // Also update periodically during game load
+    setInterval(resizeCanvas, 1000);
+
     // Register the site service worker so this game works offline
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -516,5 +560,7 @@
       });
     }
   </script>
+  <script src="/starfield.js" defer></script>
+<script src="/js/ui-settings.js"></script>
 </body>
 </html>
