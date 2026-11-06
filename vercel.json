@@ -178,6 +178,10 @@
       "destination": "/games/subway-surfers/:match*"
     },
     {
+      "source": "/geometry-dash/payload/:path*",
+      "destination": "https://aether-founder.github.io/dub5-gd-payload/:path*"
+    },
+    {
       "source": "/geometry-dash",
       "destination": "/games/geometry-dash/index.html"
     },
