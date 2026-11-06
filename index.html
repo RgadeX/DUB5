@@ -1309,22 +1309,22 @@
           let html = '';
           let index = 0;
 
-          // DUB5-made games section
-          if (dub5Games.length > 0) {
+          // Linked games section (original games) - displayed first
+          if (linkedGames.length > 0) {
             html += '<div class="nav-grid">' +
-              dub5Games.map(function (item) { return cardHTML(item, index++); }).join('') +
+              linkedGames.map(function (item) { return cardHTML(item, index++); }).join('') +
               '</div>';
           }
 
           // Separator line
-          if (dub5Games.length > 0 && linkedGames.length > 0) {
+          if (linkedGames.length > 0 && dub5Games.length > 0) {
             html += '<div class="section-separator"></div>';
           }
 
-          // Linked games section
-          if (linkedGames.length > 0) {
+          // DUB5-made games section
+          if (dub5Games.length > 0) {
             html += '<div class="nav-grid">' +
-              linkedGames.map(function (item) { return cardHTML(item, index++); }).join('') +
+              dub5Games.map(function (item) { return cardHTML(item, index++); }).join('') +
               '</div>';
           }
 

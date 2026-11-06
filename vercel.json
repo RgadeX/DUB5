@@ -197,6 +197,10 @@
       "dest": "/games/minecraft/index.html"
     },
     {
+      "src": "/minecraft/(.*)",
+      "dest": "/games/minecraft/$1"
+    },
+    {
       "src": "/skate3",
       "dest": "/games/skate3/index.html"
     },
