@@ -182,7 +182,11 @@
     },
     {
       "src": "/geometry-dash/(.*)",
-      "dest": "/games/geometry-dash/$1"
+      "dest": "/games/geometry-dash/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Encoding": "identity"
+      }
     },
     {
       "src": "/nsmbw-web-port",
