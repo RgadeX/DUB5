@@ -1,6 +1,16 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
+    {
+      "source": "/starfield.js",
+      "destination": "/js/starfield.js"
+    },
+    {
+      "source": "/ui-settings.js",
+      "destination": "/js/ui-settings.js"
+    },
     {
       "source": "/snake",
       "destination": "/games/snake/index.html"
@@ -274,6 +284,93 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/geometry-dash/(.*)",
+      "headers": [
+        {
+          "key": "Permissions-Policy",
+          "value": "accelerometer=(), autoplay=(self), camera=(), clipboard-read=(self), clipboard-write=(self), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "credentialless"
+        }
+      ]
+    },
+    {
+      "source": "/games/geometry-dash/(.*)\\.(js|mjs|css|html|json|wasm|data|png|jpg|jpeg|svg|ico|ttf|otf|woff|woff2|mp3|ogg|wav|bin)$",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/geometry-dash/(.*)\\.(js|mjs|css|html|json|wasm|data|png|jpg|jpeg|svg|ico|ttf|otf|woff|woff2|mp3|ogg|wav|bin)$",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/geometry-dash/(.*)\\.gz$",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/gzip"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable, no-transform"
+        }
+      ]
+    },
+    {
+      "source": "/geometry-dash/(.*)\\.br$",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/octet-stream"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable, no-transform"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(wasm|js|data|json|css|html|mjs)\\.gz$",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/gzip"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable, no-transform"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(wasm|js|data|json|css|html|mjs)\\.br$",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/octet-stream"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable, no-transform"
         }
       ]
     }
