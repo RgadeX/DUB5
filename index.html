@@ -1208,17 +1208,6 @@
       ];
 
       const ITEMS = [
-        // DUB5-made games (source code available)
-        { title: 'Snake', desc: 'Klassieke slang met zoom en vol modus.', href: '/snake', cat: 'games', icon: 'snake', external: false, type: 'dub5' },
-        { title: 'Block Blast', desc: 'Blokken plaatsen en lijnen volmaken.', href: '/blockblast', cat: 'games', icon: 'blocks', external: false, type: 'dub5' },
-        { title: 'Rekenmachine Spelletjes', desc: 'Spelletjes spelen op je rekenmachine.', href: '/rekenmachine', cat: 'games', icon: 'calc', external: false, type: 'dub5', localOnly: true },
-        { title: '2048', desc: 'Schuif tegels samen en haal 2048.', href: '/2048', cat: 'games', icon: 'merge', external: false, type: 'dub5' },
-        { title: 'Tetris', desc: 'Blokken laten vallen, rijen volmaken.', href: '/tetris', cat: 'games', icon: 'tetris', external: false, type: 'dub5' },
-        { title: 'Mijnenveger', desc: 'Het klassieke mijnenveger-bord.', href: '/minesweeper', cat: 'games', icon: 'mine', external: false, type: 'dub5' },
-        { title: 'Flappy Bird', desc: 'Tik en vlieg tussen de buizen door.', href: '/flappy', cat: 'games', icon: 'plane', external: false, type: 'dub5' },
-        { title: 'Pong', desc: 'Twee peddels, één bal, eindeloos.', href: '/pong', cat: 'games', icon: 'pong', external: false, type: 'dub5' },
-        { title: 'Breakout', desc: 'Breek de blokken met de bal.', href: '/breakout', cat: 'games', icon: 'game', external: false, type: 'dub5' },
-
         // Linked to original games (iframe/embedded)
         { title: 'GTA 5', desc: 'Grand Theft Auto V — Los Santos in je browser.', href: '/gta5', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
         { title: 'Liquid Soccer', desc: 'Vloeibare voetbal — dynamisch en verslavend.', href: '/liquid-soccer', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
@@ -1236,6 +1225,23 @@
         { title: 'Halo CE', desc: 'Halo Combat Evolved in je browser.', href: '/halo-ce', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
         { title: 'Halo CE Mobile', desc: 'Halo Combat Evolved voor mobiel.', href: '/halo-ce-mobile', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
         { title: 'PES 6', desc: 'Pro Evolution Soccer 6 — klassieke voetbalgame.', href: '/pes6', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'BO1 Zombies', desc: 'Black Ops 1 Zombies — overleef de horde.', href: '/bo1-zombies', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Moon Zombies', desc: 'Zombies op de maan — overleef de nacht.', href: '/moon-zombies', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Kino der Toten', desc: 'Klassieke Zombies map — cinema horror.', href: '/kino-der-toten', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'BO3 Cheese Cube', desc: 'Black Ops 3 Cheese Cube Zombies.', href: '/bo3-cheese-cube', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+        { title: 'Modern Warfare 2', desc: 'Call of Duty MW2 — de legendarische FPS.', href: '/mw2', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
+
+        // DUB5-made games (source code available)
+        { title: 'Snake', desc: 'Klassieke slang met zoom en vol modus.', href: '/snake', cat: 'games', icon: 'snake', external: false, type: 'dub5' },
+        { title: 'Block Blast', desc: 'Blokken plaatsen en lijnen volmaken.', href: '/blockblast', cat: 'games', icon: 'blocks', external: false, type: 'dub5' },
+        { title: 'Rekenmachine Spelletjes', desc: 'Spelletjes spelen op je rekenmachine.', href: '/rekenmachine', cat: 'games', icon: 'calc', external: false, type: 'dub5', localOnly: true },
+        { title: '2048', desc: 'Schuif tegels samen en haal 2048.', href: '/2048', cat: 'games', icon: 'merge', external: false, type: 'dub5' },
+        { title: 'Tetris', desc: 'Blokken laten vallen, rijen volmaken.', href: '/tetris', cat: 'games', icon: 'tetris', external: false, type: 'dub5' },
+        { title: 'Mijnenveger', desc: 'Het klassieke mijnenveger-bord.', href: '/minesweeper', cat: 'games', icon: 'mine', external: false, type: 'dub5' },
+        { title: 'Flappy Bird', desc: 'Tik en vlieg tussen de buizen door.', href: '/flappy', cat: 'games', icon: 'plane', external: false, type: 'dub5' },
+        { title: 'Pong', desc: 'Twee peddels, één bal, eindeloos.', href: '/pong', cat: 'games', icon: 'pong', external: false, type: 'dub5' },
+        { title: 'Breakout', desc: 'Breek de blokken met de bal.', href: '/breakout', cat: 'games', icon: 'game', external: false, type: 'dub5' },
+
         { title: 'BO1 Zombies', desc: 'Black Ops 1 Zombies — overleef de horde.', href: '/bo1-zombies', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
         { title: 'Moon Zombies', desc: 'Zombies op de maan — overleef de nacht.', href: '/moon-zombies', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
         { title: 'Kino der Toten', desc: 'Klassieke Zombies map — cinema horror.', href: '/kino-der-toten', cat: 'games', icon: 'game', badge: 'Nieuw', external: false, type: 'linked' },
