@@ -9,6 +9,20 @@
       }
     },
     {
+      "src": "/js/(.*)",
+      "dest": "/js/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
+    },
+    {
+      "src": "/starfield.js",
+      "dest": "/starfield.js",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
+      }
+    },
+    {
       "src": "/snake",
       "dest": "/games/snake/index.html"
     },
@@ -182,11 +196,7 @@
     },
     {
       "src": "/geometry-dash/(.*)",
-      "dest": "/games/geometry-dash/$1",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Encoding": "identity"
-      }
+      "dest": "/games/geometry-dash/$1"
     },
     {
       "src": "/nsmbw-web-port",
@@ -265,11 +275,28 @@
       "dest": "/games/gta5/index.html"
     },
     {
+      "src": "/games/(.*)",
+      "dest": "/games/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
   ],
   "headers": [
+    {
+      "source": "/geometry-dash/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "Content-Encoding",
+          "value": "identity"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
