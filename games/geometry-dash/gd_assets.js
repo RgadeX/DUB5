@@ -3,12 +3,16 @@
  * stall-watched, and retried with integrity checks. */
 (function () {
   'use strict';
+  // Payload lives on GitHub Pages; fetching directly avoids proxying
+  // ~286MB through the Vercel edge on every download.
+  var ASSET_BASE = 'https://aether-founder.github.io/dub5-gd-payload/';
+  function assetUrl(u) { return typeof u === 'string' && u.indexOf('payload/') === 0 ? ASSET_BASE + u : u; }
   var manifestPromise;
   var pending = Object.create(null);
   // Limit how many payload streams run at once. Shared/public links and
   // tunnels can drop connections when many big requests overlap, so allow
   // the page to ask for fewer with ?jobs=1.
-  var maxJobs = 2;
+  var maxJobs = 4;
   try {
     var q = new URLSearchParams(location.search).get('jobs');
     if (q) { var n = parseInt(q, 10); if (n >= 1 && n <= 8) maxJobs = n; }
@@ -99,19 +103,20 @@
     }
   }
   async function compressedResponse(entry, signal, attempt) {
+    var url = assetUrl(entry.url);
     var cache = await assetCache();
     var r = null;
     if (cache && !attempt) {
-      try { r = await cache.match(entry.url); } catch (e) { r = null; }
+      try { r = await cache.match(url); } catch (e) { r = null; }
     }
     if (!r) {
-      r = await fetch(entry.url, {cache: attempt ? 'reload' : 'force-cache', signal: signal});
+      r = await fetch(url, {cache: attempt ? 'reload' : 'force-cache', signal: signal});
       if (!r.ok) throw new Error(entry.url + ': HTTP ' + r.status);
       if (!r.body) throw new Error('This browser cannot stream game assets.');
       if (cache) {
         // Store the body as transferred; only a complete transfer commits,
         // so a dropped connection never poisons the stored copy.
-        var put = cache.put(entry.url, r.clone());
+        var put = cache.put(url, r.clone());
         if (put && put.catch) put.catch(function () {});
       }
     }
