@@ -1,7 +1,7 @@
 // Service Worker for DUB5 PWA
 // Update this version on each deployment to force cache refresh
 const CACHE_VERSION = '1.0.0';
-const CACHE_BUILD = '034'; // Increment this on each build
+const CACHE_BUILD = '035'; // Increment this on each build
 const CACHE_NAME = `dub5-v${CACHE_VERSION}.${CACHE_BUILD}`;
 const APP_SHELL = [
   '/',
@@ -44,9 +44,6 @@ const APP_SHELL = [
   // Shared game assets
   '/showcase/showcase.css',
   '/showcase/showcase.js',
-  '/js/starfield.js',
-  '/js/game-shell.js',
-  '/js/ui-settings.js',
   '/games/memory/starfield.js',
   '/games/rekenmachine/starfield.js',
   '/games/sudoku/starfield.js',

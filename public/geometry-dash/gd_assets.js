@@ -6,7 +6,12 @@
   // Payload lives on GitHub Pages; fetching directly avoids proxying
   // ~286MB through the Vercel edge on every download.
   var ASSET_BASE = 'https://aether-founder.github.io/dub5-gd-payload/';
-  function assetUrl(u) { return typeof u === 'string' && u.indexOf('payload/') === 0 ? ASSET_BASE + u : u; }
+  function assetUrl(u) {
+    // Manifest paths look like "payload/<file>"; the Pages repo stores the
+    // files at its root, so strip the prefix.
+    return typeof u === 'string' && u.indexOf('payload/') === 0
+      ? ASSET_BASE + u.slice('payload/'.length) : u;
+  }
   var manifestPromise;
   var pending = Object.create(null);
   // Limit how many payload streams run at once. Shared/public links and
