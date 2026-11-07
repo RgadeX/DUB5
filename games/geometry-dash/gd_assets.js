@@ -12,7 +12,7 @@
   // Limit how many payload streams run at once. Shared/public links and
   // tunnels can drop connections when many big requests overlap, so allow
   // the page to ask for fewer with ?jobs=1.
-  var maxJobs = 4;
+  var maxJobs = 6;
   try {
     var q = new URLSearchParams(location.search).get('jobs');
     if (q) { var n = parseInt(q, 10); if (n >= 1 && n <= 8) maxJobs = n; }
